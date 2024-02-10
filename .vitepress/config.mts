@@ -3,6 +3,7 @@ import overview from "../toolSoftware/overview";
 const [life, tool, exploit] = overview;
 export default defineConfig({
   lang: 'zh-Hans',
+  base:'/my-home/',
   title: "Seahor",
   head: [["link", { rel: "icon", type: "image/svg+xml", href: "/cat.svg" }]],
   themeConfig: {
