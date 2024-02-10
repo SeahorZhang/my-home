@@ -1,24 +1,18 @@
 <script setup>
 import overview from "./overview";
 import { Link } from "@element-plus/icons-vue";
+import { withBase } from 'vitepress'
 
 const props = defineProps({
-  name: String,
-  // type: String,
-  // url: String,
-  // fee: Number,
-  // links: Array,
-  // imgs: Array,
-  // path: String,
-  // synopsis: String,
+  name: String
 });
 
 let data = {};
 overview.forEach((item) => {
   item.items.forEach((list) => {
-    if (list.text === props.name) {
-      return (data = list);
-    }
+    if (list.link === props.name) {
+    return (data = list);
+  }
   });
 });
 </script>
@@ -54,7 +48,7 @@ overview.forEach((item) => {
     </a>
   </p>
 
-  <el-image v-for="(item, i) in data.imgs" :key="i" :src="item" />
+  <el-image v-for="(item, i) in data.imgs" :key="i" :src="withBase(item)" />
 </template>
 <style scoped>
 .button + .button {

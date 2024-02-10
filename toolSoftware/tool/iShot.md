@@ -4,4 +4,4 @@ import AppTemplate from '../AppTemplate.vue'
 
 </script>
 
-<AppTemplate name='iShot Pro'/>
+<AppTemplate name='iShot'/>

@@ -111,7 +111,7 @@ export default [
       {
         text: "One Switch (淘汰)",
         type: "快捷按键",
-        link: "OneSwitch",
+        link: "oneSwitch",
         tag:[
           { text:'收费', type:'warning' },
           { text:'淘汰', type:'danger' },

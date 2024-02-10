@@ -3,4 +3,4 @@ import AppTemplate from '../AppTemplate.vue'
 
 </script>
 
-<AppTemplate name='Bartender'/>
+<AppTemplate name='bartender'/>

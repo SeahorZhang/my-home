@@ -3,4 +3,4 @@ import AppTemplate from '../AppTemplate.vue'
 
 </script>
 
-<AppTemplate name='Chrome'/>
+<AppTemplate name='chrome'/>

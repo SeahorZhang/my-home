@@ -1,6 +1,6 @@
 import { defineConfig } from "vitepress";
 import overview from "../toolSoftware/overview";
-const [life, tool, exploit] = overview;
+const [life, tool] = overview;
 export default defineConfig({
   lang: 'zh-Hans',
   base:'/my-home/',
@@ -58,7 +58,6 @@ export default defineConfig({
         },
         life,
         tool,
-        exploit,
       ],
     },
   },

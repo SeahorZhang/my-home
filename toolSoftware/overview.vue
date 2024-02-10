@@ -1,17 +1,19 @@
 <script setup>
 import data from "./overview";
+import { withBase } from 'vitepress'
+
 </script>
 
 <template>
   <template v-for="(list, i) in data" :key="i">
     <h3 style="margin-bottom: 12px">{{ list.text }}</h3>
     <div class="grid">
-      <a v-for="(item, j) in list.items" :key="j" :href="list.base + item.link">
+      <a v-for="(item, j) in list.items" :key="j" :href="withBase(list.base + item.link)">
         <el-card class="card" shadow="hover">
           <h3>{{ item.text }}</h3>
           <el-row justify="center">
-            <el-tag class="tag" :type="item.fee ? 'warning' : 'success'">
-              {{ item.fee ? "收费" : "免费" }}
+            <el-tag v-for="tag in item.tag" class="tag" :type="tag.type">
+              {{ tag.text}}
             </el-tag>
             <el-tag class="tag">{{ item.type }}</el-tag>
           </el-row>
