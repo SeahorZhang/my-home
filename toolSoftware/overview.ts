@@ -8,7 +8,7 @@ export default [
         link: "chrome",
         type: "浏览器",
         tag:[
-          { text:'免费', type:'success' }
+          { text:'免费', type:'tip' }
         ],
         links: [
           {
@@ -24,7 +24,7 @@ export default [
         type: "播放器",
         link: "iina",
         tag:[
-          { text:'免费', type:'success' }
+          { text:'免费', type:'tip' }
         ],
         links: [
           {
@@ -60,7 +60,7 @@ export default [
         type: "日历",
         link: "Itsycal",
         tag:[
-          { text:'免费', type:'success' }
+          { text:'免费', type:'tip' }
         ],
         links: [
           {
@@ -78,7 +78,7 @@ export default [
         link: "MenubarX",
         tag:[
           { text:'收费', type:'warning' },
-          { text:'待淘汰', type:'info' },
+          { text:'淘汰', type:'danger' },
         ],
         website: "https://menubarx.app/",
         links: [
@@ -96,7 +96,7 @@ export default [
         type: "显示器调节",
         link: "MonitorControl",
         tag:[
-          { text:'免费', type:'success' }
+          { text:'免费', type:'tip' }
         ],
         links: [
           {
@@ -135,7 +135,7 @@ export default [
         type: "快捷按键",
         link: "OnlySwitch",
         tag:[
-          { text:'免费', type:'success' },
+          { text:'免费', type:'tip' },
         ],
         links: [
           {
@@ -212,7 +212,7 @@ export default [
         type: "解压缩",
         link: "keka",
         tag:[
-          { text:'官网免费', type:'success' },
+          { text:'官网免费', type:'tip' },
           { text:'APP Store 收费', type:'warning' },
         ],
         links: [
@@ -233,7 +233,7 @@ export default [
         type: "代理",
         link: "clashX",
         tag:[
-          { text:'免费', type:'success' }
+          { text:'免费', type:'tip' }
         ],
         links: [
           {

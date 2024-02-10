@@ -1,7 +1,15 @@
 <script setup>
-import overview from "./overview";
+import overview from "../toolSoftware/overview";
 import { Link } from "@element-plus/icons-vue";
 import { withBase } from 'vitepress'
+import slugify from '@sindresorhus/slugify'
+import { defineProps, computed,onMounted } from 'vue'
+import { useData } from 'vitepress'
+const {title} = useData()
+// 设置网页标题
+onMounted(() => {
+  document.title = `${data.text} | ${title.value}`
+})
 
 const props = defineProps({
   name: String
@@ -15,12 +23,14 @@ overview.forEach((item) => {
   }
   });
 });
+
+const id = computed(() => slugify(data.text))
 </script>
 
 <template>
-  <h1 :id="data.text">
+  <h1 :id="id">
     {{ data.text }}
-    <a class="header-anchor" :href="`#${data.text}`" :aria-label="`Permalink to &quot;${data.text}&quot;`">​</a>
+    <a class="header-anchor" :href="`#${id}`" :aria-label="`Permalink to &quot;${data.text}&quot;`">​</a>
     <Badge v-for="(item,i) in data.tag" :key="i" :type="item.type" :text="item.text" />
   </h1>
 

@@ -12,6 +12,7 @@ import { withBase } from 'vitepress'
         <el-card class="card" shadow="hover">
           <h3>{{ item.text }}</h3>
           <el-row justify="center">
+    <!-- <Badge v-for="(tag,i) in item.tag" :key="i" :type="tag.type" :text="tag.text" /> -->
             <el-tag v-for="tag in item.tag" class="tag" :type="tag.type">
               {{ tag.text}}
             </el-tag>
