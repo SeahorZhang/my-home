@@ -45,18 +45,12 @@ const svg = computed(() => {
 .grid {
   --m-nav-gap: 10px;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
   grid-row-gap: var(--m-nav-gap);
   grid-column-gap: var(--m-nav-gap);
   grid-auto-flow: row dense;
   justify-content: center;
   margin-top: var(--m-nav-gap);
-}
-
-@media (min-width: 500px) {
-  .grid {
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  }
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
 }
 
 .grid__item {
