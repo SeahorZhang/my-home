@@ -1,29 +1,9 @@
 <script setup lang="ts">
-import { defineProps, computed } from 'vue'
 import data from './data'
 import { withBase } from 'vitepress'
-
-const props = defineProps<{
-  /** 图标 */
-  icon?: string | { svg: string }
-  /** 名称 */
-  text: string
-  /** 描述 */
-  desc?: string
-  /** 链接 */
-  links?: string[]
-  tag?: string[]
-}>()
-
-const svg = computed(() => {
-  if (typeof props.icon === 'object') return props.icon.svg
-  return ''
-})
 </script>
 
-
 <template>
-
   <template v-for="({ text, items }, i) in data" :key="i">
     <h3 style="margin-bottom: 12px"> {{ text }} </h3>
     <div class="grid">
