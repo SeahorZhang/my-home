@@ -50,7 +50,7 @@ const svg = computed(() => {
   grid-auto-flow: row dense;
   justify-content: center;
   margin-top: var(--m-nav-gap);
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
 }
 
 .grid__item {
