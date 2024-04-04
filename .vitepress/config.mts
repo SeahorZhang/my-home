@@ -1,6 +1,4 @@
 import { defineConfig } from "vitepress";
-import overview from "../toolSoftware/overview";
-const [life, tool] = overview;
 export default defineConfig({
   lang: 'zh-Hans',
   // base:'/my-home/',
@@ -49,17 +47,6 @@ export default defineConfig({
         activeMatch: "/toolSoftware/",
       },
     ],
-
-    sidebar: {
-      "/toolSoftware/": [
-        {
-          text: "总览",
-          link: "/toolSoftware/overview",
-        },
-        life,
-        tool,
-      ],
-    },
+    aside:false,
   },
-  
 });
