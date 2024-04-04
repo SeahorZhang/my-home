@@ -20,13 +20,10 @@ hero:
 
 features:
   - icon: 🛠️
-    title: 工具
-    details: 工欲善其事，必先利其器<br />记录开发和日常使用中所用到的软件、插件、扩展等
+    title: 软件
+    details: 工欲善其事，必先利其器。<br />记录开发和日常使用中所用到的软件。
     link: /toolSoftware/overview
-    linkText: 常用工具
-  - icon: 💡
-    title: 开发
-    details: 一直都是半成品，不敢放上来。
+    linkText: 常用软件
   - icon: 📖
     title: 吾志所向，一往无前。
     details: 一个想摆脱公司束缚的迷茫开发者
