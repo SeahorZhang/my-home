@@ -2,6 +2,10 @@
   text-decoration: none;
 }
 
+.VPPage {
+  height: 100%;
+}
+
 :root {
   --vp-home-hero-name-color: transparent;
   --vp-home-hero-name-background: -webkit-linear-gradient(215deg,
@@ -34,9 +38,10 @@
 }
 
 @media (min-width: 960px) {
-  .VPDoc:not(.has-sidebar) .container{
+  .VPDoc:not(.has-sidebar) .container {
     display: flex;
     justify-content: center;
+
     .content {
       max-width: 100%;
     }

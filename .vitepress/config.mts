@@ -5,7 +5,7 @@ export default defineConfig({
   title: "Seahor",
   head: [["link", { rel: "icon", type: "image/svg+xml", href: "/cat.svg" }]],
   themeConfig: {
-  logo: "/cat.svg",
+    logo: "/cat.svg",
     socialLinks: [{ icon: "github", link: "https://github.com/Miss-Sixty" }],
     editLink: {
       text: "为此页提供修改建议",
@@ -42,11 +42,22 @@ export default defineConfig({
     darkModeSwitchTitle: '切换到深色模式',
     nav: [
       {
+        text: "个人项目",
+        activeMatch: "/app/wtab",
+        items: [
+          {
+            text: 'WTab',
+            link: '/app/wtab',
+          },
+        ]
+      },
+      {
         text: "工具软件",
         link: "/toolSoftware/overview",
         activeMatch: "/toolSoftware/",
+
       },
     ],
-    aside:false,
+    aside: false,
   },
 });
