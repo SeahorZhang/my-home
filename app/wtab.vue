@@ -8,7 +8,7 @@
     <p class="title">WTab，组件视界</p>
     <p class="text">只需联网加载一次，后续即可离线使用。所有数据均存在本地，你的数据你掌控！</p>
     <button class="btn">
-      <a type="button" href="https://next.wtab.cn/" target="_blank">去体验</a>
+      <a type="button" href="https://wtab.cn/" target="_blank">去体验</a>
     </button>
   </div>
 </template>
@@ -30,10 +30,11 @@
   font-weight: 700;
   color: #fff;
   margin-top: 40px;
+  line-height: 1;
 }
 
 .text {
-  width: 700px;
+  max-width: 700px;
   font-size: 22px;
   color: #777474;
   margin: 50px auto 0 auto;

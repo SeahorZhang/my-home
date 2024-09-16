@@ -1,20 +1,34 @@
 <script setup lang="ts">
-import data from './data'
-import { withBase } from 'vitepress'
+import data from "./data";
+import { withBase } from "vitepress";
 </script>
 
 <template>
   <template v-for="({ text, items }, i) in data" :key="i">
-    <h3 style="margin-bottom: 12px"> {{ text }} </h3>
+    <h3 style="margin-bottom: 12px">{{ text }}</h3>
     <div class="grid">
-      <a v-for="(item, j) in items" :key="j" class="grid__item" :href="item.link" target="_blank">
+      <a
+        v-for="(item, j) in items"
+        :key="j"
+        class="grid__item"
+        :href="item.link"
+        target="_blank"
+      >
         <div class="header">
-          <img v-if="item.icon" width="32px" height="32px" :src="withBase('/img/toolSoftware' + item.icon)" />
+          <img
+            v-if="item.icon"
+            :src="withBase('/img/toolSoftware' + item.icon)"
+          />
           <span>{{ item.text }}</span>
         </div>
-        <p class="desc" :title="item.desc"> {{ item.desc }} </p>
+        <p class="desc" :title="item.desc">{{ item.desc }}</p>
         <div class="tag">
-          <Badge v-for="tag in item.tags" :key="tag" :type="tag.type" :text="tag.text" />
+          <Badge
+            v-for="tag in item.tags"
+            :key="tag"
+            :type="tag.type"
+            :text="tag.text"
+          />
         </div>
       </a>
     </div>
@@ -57,9 +71,10 @@ import { withBase } from 'vitepress'
   color: var(--vp-c-text-1);
 }
 
-
 .header img {
   margin-right: 10px;
+  height: 32px;
+  width: 32px;
 }
 
 .desc {
@@ -83,7 +98,7 @@ import { withBase } from 'vitepress'
   margin-top: 10px;
 }
 
-.tag>* {
+.tag > * {
   margin: 0 4px 4px 0;
 }
 </style>
