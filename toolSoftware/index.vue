@@ -23,12 +23,12 @@ import { withBase } from "vitepress";
           <span>{{ item.text }}</span>
         </div>
         <p 
-          class="flex-1 line-clamp-2 overflow-hidden text-ellipsis m-0 leading-5 text-xs text-[var(--vp-c-text-2)]"
+          class="flex-1 line-clamp-2 overflow-hidden text-ellipsis m-0 text-xs text-[var(--vp-c-text-2)]"
           :title="item.desc"
         >
           {{ item.desc }}
         </p>
-        <div class="flex items-center flex-wrap mt-2.5 [&>*]:mr-1 [&>*]:mb-1">
+        <div class="flex items-center flex-wrap mt-1 [&>*]:mr-1 [&>*]:mb-1">
           <Badge
             v-for="tag in item.tags"
             :key="tag"
