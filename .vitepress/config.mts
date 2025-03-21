@@ -6,10 +6,10 @@ export default defineConfig({
   head: [["link", { rel: "icon", type: "image/svg+xml", href: "/cat.svg" }]],
   themeConfig: {
     logo: "/cat.svg",
-    socialLinks: [{ icon: "github", link: "https://github.com/Miss-Sixty" }],
+    socialLinks: [{ icon: "github", link: "https://github.com/SeahorZhang/my-home" }],
     editLink: {
       text: "为此页提供修改建议",
-      pattern: "https://github.com/Miss-Sixty/my-home/edit/main/docs/:path",
+      pattern: "https://github.com/SeahorZhang/my-home/edit/main/docs/:path",
     },
     lastUpdatedText: "最近更新时间",
     footer: {
@@ -49,6 +49,14 @@ export default defineConfig({
             text: 'WTab',
             link: '/app/wtab',
           },
+          // {
+          //   text: 'SyncCookies',
+          //   link: '/app/syncCookies',
+          // },
+          // {
+          //   text: 'Pinece',
+          //   link: '/app/pinece',
+          // },
         ]
       },
       {
