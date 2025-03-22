@@ -1,6 +1,10 @@
 <script setup lang="ts">
-import data from "./data";
 import IconComponent from "./IconComponent.vue";
+import Props from "./type";
+
+defineProps<{
+  data: Props[];
+}>();
 </script>
 
 <template>

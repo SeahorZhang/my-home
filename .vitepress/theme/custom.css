@@ -5,7 +5,7 @@
 }
 
 .vp-doc p {
-  @apply text-xs;
+  @apply leading-5;
 }
 
 @media (min-width: 1440px) {
