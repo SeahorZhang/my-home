@@ -20,7 +20,7 @@ const data = [
       {
         text: "Infuse",
         type: "播放器",
-        icon: "/Infuse.png",
+        icon: "./icons/Infuse.png",
         link: "https://firecore.cn/infuse",
         tags: [{ text: "收费", type: "warning" }],
         desc: "优雅强大的视频播放器，支持几乎所有视频格式，适用于iPhone、iPad、Apple TV和Mac。",
@@ -28,7 +28,7 @@ const data = [
       {
         text: "MarkMark",
         type: "网址记录",
-        icon: "/MarkMark.png",
+        icon: "./icons/MarkMark.png",
         link: "https://apps.apple.com/cn/app/markmark/id6475077023",
         tags: [{ text: "收费", type: "warning" }],
         desc: "全新的收藏工具，帮助你收集和整理文章、网站和各类网页，超越普通书签和稍后阅读应用的功能。",
@@ -37,7 +37,7 @@ const data = [
         text: "Google Chrome",
         type: "浏览器",
         desc: "Chrome，不一样的浏览器体验",
-        icon: "/Chrome.png",
+        icon: "./icons/Chrome.png",
         link: "https://www.google.cn/intl/zh-CN/chrome/",
         tags: [{ text: "免费", type: "tip" }],
       },
@@ -65,7 +65,7 @@ const data = [
       {
         text: "Easydict",
         type: "翻译",
-        icon: "/Easydict.png",
+        icon: "./icons/Easydict.png",
         link: "https://github.com/tisfeng/Easydict",
         tags: [{ text: "免费", type: "tip" }],
         desc: "Easydict 是一个简洁易用的词典翻译 macOS App，能够轻松优雅地查找单词或翻译文本。",
@@ -80,7 +80,7 @@ const data = [
       {
         text: "iShot Pro",
         type: "截图",
-        icon: "/iShotPro.png",
+        icon: "./icons/iShotPro.png",
         link: "https://www.better365.cn/ishot.html",
         tags: [{ text: "收费", type: "warning" }],
         desc: "截图、长截图、全屏带壳截图、贴图、标注、取色、录屏、录音、OCR、翻译，一个顶十个，样样皆优秀！",
@@ -95,7 +95,7 @@ const data = [
       {
         text: "MonitorControl",
         type: "显示器调节",
-        icon: "/MonitorControl.png",
+        icon: "./icons/MonitorControl.png",
         link: "https://github.com/MonitorControl/MonitorControl",
         github: "https://github.com/MonitorControl/MonitorControl",
         desc: "控制外部显示器的亮度和音量，并显示本机OSD。使用menulet滑块或键盘，包括本机Apple键！",
@@ -111,7 +111,7 @@ const data = [
       {
         text: "Downie",
         type: "视频下载",
-        icon: "/Downie.png",
+        icon: "./icons/Downie.png",
         desc: "简单易用的视频下载工具，支持从YouTube、Vimeo等上千个网站下载视频，自动检测浏览器中的视频。",
         link: "https://software.charliemonroe.net/downie/",
         tags: [{ text: "收费", type: "warning" }],
@@ -119,7 +119,7 @@ const data = [
       {
         text: "One Switch",
         type: "快捷按键",
-        icon: "/OneSwitch.png",
+        icon: "./icons/OneSwitch.png",
         desc: "所有强大的开关都集中在一个地方。",
         link: "https://fireball.studio/oneswitch/",
         tags: [
@@ -143,7 +143,7 @@ const data = [
       {
         text: "Keka",
         type: "解压缩",
-        icon: "/Keka.png",
+        icon: "./icons/Keka.png",
         link: "https://www.keka.io/",
         tags: [{ text: "官网免费", type: "tip" }],
         desc: "macOS文件压缩解压工具，存储更多内容，保护隐私共享文件。",
@@ -172,7 +172,7 @@ const data = [
         text: "网速&电池",
         type: "网速",
         desc: "实时网速 & 电池健康",
-        icon: "/internetSpeed.png",
+        icon: "./icons/internetSpeed.png",
         link: "https://apps.apple.com/cn/app/%E7%BD%91%E9%80%9F-%E7%94%B5%E6%B1%A0/id1387780159?mt=12",
         tags: [{ text: "收费", type: "warning" }],
       },
@@ -180,7 +180,7 @@ const data = [
         text: "App Cleaner & Uninstaller",
         type: "卸载",
         desc: "智能、直观且高效的Mac清理工具，用于卸载应用程序并管理各类扩展。",
-        icon: "/AppCleaner.png",
+        icon: "./icons/AppCleaner.png",
         link: "https://nektony.com/mac-app-cleaner",
         tags: [{ text: "收费", type: "warning" }],
       },
@@ -202,7 +202,7 @@ const data = [
         text: "Shadowrocket",
         type: "代理",
         desc: "基于规则的代理工具客户端，适用于iPhone/iPad。",
-        icon: "/Shadowrocket.png",
+        icon: "./icons/Shadowrocket.png",
         link: "https://apps.apple.com/us/app/shadowrocket/id932747118?l=zh-Hans-CN",
         tags: [
           { text: "收费", type: "warning" },
@@ -212,7 +212,7 @@ const data = [
       {
         text: "VMware Fusion",
         type: "虚拟机",
-        icon: "/VMware.png",
+        icon: "./icons/VMware.png",
         desc: "强大的桌面虚拟化软件，允许Mac用户在macOS上运行Windows等其他操作系统，支持多种虚拟化需求。",
         link: "https://www.vmware.com/products/fusion.html",
         tags: [
@@ -237,7 +237,7 @@ const data = [
       {
         text: "Thor",
         type: "小工具",
-        icon: "/Thor.png",
+        icon: "./icons/Thor.png",
         desc: "快速打开指定应用程序的启动工具。",
         link: "https://apps.apple.com/us/app/thor-launcher/id1120999687?l=zh-Hans-CN&mt=12",
         github: "https://github.com/gbammc/Thor",
@@ -246,7 +246,7 @@ const data = [
       {
         text: "OnlySwitch",
         type: "快捷按键",
-        icon: "/OnlySwitch.png",
+        icon: "./icons/OnlySwitch.png",
         desc: "菜单栏多合一开关工具，简洁实用。",
         link: "https://github.com/jacklandrin/OnlySwitch",
         tags: [
