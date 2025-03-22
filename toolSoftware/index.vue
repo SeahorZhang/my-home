@@ -14,7 +14,7 @@ import { withBase } from "vitepress";
         :href="item.link"
         target="_blank"
       >
-        <div class="flex items-center mb-2.5 h-8 text-[var(--vp-c-text-1)]">
+        <div class="flex items-center h-8 text-[var(--vp-c-text-1)]">
           <img
             v-if="item.icon"
             :src="withBase('/img/toolSoftware' + item.icon)"
