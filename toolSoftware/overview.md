@@ -48,7 +48,6 @@ const data = [
         link: "https://sparkmailapp.com/",
         tags: [
           { text: "基础免费", type: "tip" },
-          { text: "订阅", type: "warning" }
         ],
       },
     ],
@@ -81,7 +80,7 @@ const data = [
       {
         text: "iShot Pro",
         type: "截图",
-        icon: "/iShotPro.webp",
+        icon: "/iShotPro.png",
         link: "https://www.better365.cn/ishot.html",
         tags: [{ text: "收费", type: "warning" }],
         desc: "截图、长截图、全屏带壳截图、贴图、标注、取色、录屏、录音、OCR、翻译，一个顶十个，样样皆优秀！",
@@ -108,6 +107,25 @@ const data = [
         link: "https://manico.im/#home",
         tags: [{ text: "收费", type: "warning" }],
         desc: "Manico 是一个为 macOS 设计的快速的 App 启动和切换工具",
+      },
+      {
+        text: "Downie",
+        type: "视频下载",
+        icon: "/Downie.png",
+        desc: "简单易用的视频下载工具，支持从YouTube、Vimeo等上千个网站下载视频，自动检测浏览器中的视频。",
+        link: "https://software.charliemonroe.net/downie/",
+        tags: [{ text: "收费", type: "warning" }],
+      },
+      {
+        text: "One Switch",
+        type: "快捷按键",
+        icon: "/OneSwitch.png",
+        desc: "所有强大的开关都集中在一个地方。",
+        link: "https://fireball.studio/oneswitch/",
+        tags: [
+          { text: "收费", type: "warning" },
+          { text: "弃用", type: "danger" },
+        ],
       },
     ],
   },
@@ -154,7 +172,7 @@ const data = [
         text: "网速&电池",
         type: "网速",
         desc: "实时网速 & 电池健康",
-        icon: "/internetSpeed.webp",
+        icon: "/internetSpeed.png",
         link: "https://apps.apple.com/cn/app/%E7%BD%91%E9%80%9F-%E7%94%B5%E6%B1%A0/id1387780159?mt=12",
         tags: [{ text: "收费", type: "warning" }],
       },
@@ -162,7 +180,7 @@ const data = [
         text: "App Cleaner & Uninstaller",
         type: "卸载",
         desc: "智能、直观且高效的Mac清理工具，用于卸载应用程序并管理各类扩展。",
-        icon: "/Uninstaller.png",
+        icon: "/AppCleaner.png",
         link: "https://nektony.com/mac-app-cleaner",
         tags: [{ text: "收费", type: "warning" }],
       },
@@ -191,22 +209,21 @@ const data = [
           { text: "外区", type: "warning" },
         ],
       },
+      {
+        text: "VMware Fusion",
+        type: "虚拟机",
+        icon: "/VMware.png",
+        desc: "强大的桌面虚拟化软件，允许Mac用户在macOS上运行Windows等其他操作系统，支持多种虚拟化需求。",
+        link: "https://www.vmware.com/products/fusion.html",
+        tags: [
+          { text: "免费", type: "tip" },
+        ],
+      },
     ],
   },
   {
     text: "弃用",
     items: [
-      {
-        text: "One Switch",
-        type: "快捷按键",
-        icon: "/OneSwitch.svg",
-        desc: "所有强大的开关都集中在一个地方。",
-        link: "https://fireball.studio/oneswitch/",
-        tags: [
-          { text: "收费", type: "warning" },
-          { text: "弃用", type: "danger" },
-        ],
-      },
       {
         text: "MenubarX",
         type: "浏览器",
