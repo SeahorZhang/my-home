@@ -45,6 +45,39 @@ async function findAppPath(appName) {
 }
 
 /**
+ * 获取应用的实际显示名称
+ * @param {string} appPath 应用路径
+ * @returns {Promise<string>} 应用显示名称
+ */
+async function getAppDisplayName(appPath) {
+  try {
+    // 尝试从Info.plist获取CFBundleDisplayName
+    // const { stdout: displayName } = await execPromise(
+    //   `defaults read "${appPath}/Contents/Info" CFBundleDisplayName 2>/dev/null || echo ""`
+    // ).catch(() => ({ stdout: "" }));
+    
+    // if (displayName.trim()) {
+    //   return displayName.trim();
+    // }
+    
+    // // 尝试从Info.plist获取CFBundleName
+    // const { stdout: bundleName } = await execPromise(
+    //   `defaults read "${appPath}/Contents/Info" CFBundleName 2>/dev/null || echo ""`
+    // ).catch(() => ({ stdout: "" }));
+    
+    // if (bundleName.trim()) {
+    //   return bundleName.trim();
+    // }
+    
+    // 如果以上都没有，使用文件名（去掉.app后缀）
+    return path.basename(appPath, ".app");
+  } catch (error) {
+    console.log(`获取应用显示名称出错，使用默认名称: ${error.message}`);
+    return path.basename(appPath, ".app");
+  }
+}
+
+/**
  * 从应用提取图标并更新应用数据
  * @param {string} appPath 应用路径
  * @param {string} outputPath 输出路径
@@ -92,9 +125,8 @@ async function extractIconAndUpdateApp(appPath, outputPath, size, app) {
       `sips -s format png "${iconFile}" --out "${iconPath}" --resampleHeightWidth ${size} ${size}`
     );
     
-    // 更新应用对象的icon属性
-    const relativePath = path.relative(process.cwd(), iconPath).replace(/\\/g, '/');
-    app.icon = `./icons/${path.basename(iconPath)}`;
+    // 更新应用对象的icon属性 - 只存储文件名，不带路径
+    app.icon = path.basename(iconPath);
     
     return iconPath;
   } catch (error) {
@@ -105,39 +137,83 @@ async function extractIconAndUpdateApp(appPath, outputPath, size, app) {
 /**
  * 保存更新后的数据到文件
  * @param {string} filePath 文件路径
- * @param {Array} data 更新后的数据数组
+ * @param {Array} updatedData 更新后的数据数组
  */
-async function saveDataToFile(filePath, data) {
+async function saveDataToFile(filePath, updatedData) {
   try {
     // 读取原始文件内容
     const content = fs.readFileSync(filePath, 'utf-8');
+    // 重新导入原始数据以进行比较
+    const originalModule = await import(`${filePath}?t=${Date.now()}`);
+    const originalData = originalModule.data || originalModule.default;
     
-    // 将数据转换为格式化的字符串
-    const dataStr = JSON.stringify(data, null, 2)
-      // 将JSON格式转换为JS格式
-      .replace(/"([^"]+)":/g, '$1:')
-      // 将双引号转换为单引号
-      .replace(/"/g, "'");
+    // 创建一个修改后的内容副本
+    let modifiedContent = content;
     
-    // 查找原始数据部分
-    const exportMatch = content.match(/(export\s+(?:const|let|var)\s+data\s*=\s*)\[[\s\S]*?\](;?)/);
-    
-    if (!exportMatch) {
-      throw new Error('无法找到data导出声明');
+    // 对每个类别进行处理
+    for (let i = 0; i < originalData.length; i++) {
+      const originalCategory = originalData[i];
+      const updatedCategory = updatedData[i];
+      
+      // 跳过没有 items 的类别
+      if (!Array.isArray(originalCategory.items) || !Array.isArray(updatedCategory.items)) {
+        continue;
+      }
+      
+      // 对每个应用进行处理
+      for (let j = 0; j < originalCategory.items.length; j++) {
+        if (j >= updatedCategory.items.length) break;
+        
+        const originalApp = originalCategory.items[j];
+        const updatedApp = updatedCategory.items[j];
+        
+        // 只更新 text 字段
+        if (originalApp.text !== updatedApp.text) {
+          // 更新 text 字段 - 精确匹配以避免错误替换
+          const textRegex = new RegExp(`(text\\s*:\\s*)['"]${escapeRegExp(originalApp.text)}['"]`, 'g');
+          modifiedContent = modifiedContent.replace(textRegex, `$1'${updatedApp.text}'`);
+          console.log(`更新应用名称: ${originalApp.text} -> ${updatedApp.text}`);
+        }
+        
+        // 更新 icon 字段
+        if (updatedApp.icon && originalApp.icon !== updatedApp.icon) {
+          if (originalApp.icon) {
+            // 替换现有的 icon 字段 - 精确匹配以避免错误替换
+            const iconRegex = new RegExp(`(icon\\s*:\\s*)['"]${escapeRegExp(originalApp.icon)}['"]`, 'g');
+            modifiedContent = modifiedContent.replace(iconRegex, `$1'${updatedApp.icon}'`);
+            console.log(`更新图标名称: ${originalApp.text} -> ${updatedApp.icon}`);
+          } else {
+            // 如果原来没有 icon 字段，在 text 字段后添加
+            const appRegex = new RegExp(`(text\\s*:\\s*['"]${escapeRegExp(updatedApp.text)}['"])([,\\s]*?)`, 'g');
+            modifiedContent = modifiedContent.replace(appRegex, `$1,\n      icon: '${updatedApp.icon}'$2`);
+            console.log(`添加图标名称: ${updatedApp.text} -> ${updatedApp.icon}`);
+          }
+        }
+      }
     }
     
-    // 替换数据部分，保留导出声明
-    const updatedContent = content.replace(
-      exportMatch[0],
-      `${exportMatch[1]}${dataStr}${exportMatch[2]}`
-    );
+    // 如果内容没有变化，不需要写入
+    if (modifiedContent === content) {
+      console.log("文件内容没有变化，跳过写入");
+      return;
+    }
     
     // 写入文件
-    fs.writeFileSync(filePath, updatedContent, 'utf-8');
+    fs.writeFileSync(filePath, modifiedContent, 'utf-8');
     console.log(`已更新数据文件: ${filePath}`);
   } catch (error) {
+    console.error(`保存数据文件错误详情: ${error.stack}`);
     throw new Error(`保存数据文件失败: ${error.message}`);
   }
+}
+
+/**
+ * 转义正则表达式中的特殊字符
+ * @param {string} string 需要转义的字符串
+ * @returns {string} 转义后的字符串
+ */
+function escapeRegExp(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 /**
@@ -166,7 +242,7 @@ async function main() {
     for (const category of data) {
       if (!Array.isArray(category.items)) continue;
       
-      console.log(`处理类别: ${category.text}`);
+      console.log(`========== 处理类别: ${category.text} ==========`);
       
       // 遍历类别中的所有应用
       for (const app of category.items) {
@@ -177,20 +253,33 @@ async function main() {
           // 查找应用路径
           const appPath = await findAppPath(app.text);
           
-          // 获取实际应用名称
-          const actualAppName = path.basename(appPath, ".app");
-          if (actualAppName !== app.text) {
-            console.log(`  应用名称差异: "${app.text}" -> "${actualAppName}"`);
-            // 更新应用名称为实际名称
-            app.text = actualAppName;
-            dataUpdated = true;
+          // 获取应用的实际显示名称（而不是文件系统名称）
+          const displayName = await getAppDisplayName(appPath);
+          
+          // 使用文件系统名称作为备用
+          const fsName = path.basename(appPath, ".app");
+          
+          // 只使用data.js中的原始名称或者UI显示名称，不使用文件系统名称
+          if (displayName !== app.text && displayName !== fsName) {
+            console.log(`应用名称差异: "${app.text}" -> "${displayName}" (文件系统: "${fsName}")`);
+            
+            // 确认使用哪个名称 - 优先使用显示名称，除非它看起来不正确
+            if (displayName.length > 0 && displayName.length < 50) {
+              // 更新为显示名称
+              app.text = displayName;
+              dataUpdated = true;
+              console.log(`  更新为显示名称: "${displayName}"`);
+            } else {
+              // 保留原名称
+              console.log(`  保留原名称: "${app.text}"`);
+            }
           }
           
           // 提取图标并更新应用对象
           await extractIconAndUpdateApp(appPath, OUTPUT_DIR, ICON_SIZE, app);
           dataUpdated = true;
         } catch (error) {
-          console.error(`  处理应用"${app.text}"出错: ${error.message}`);
+          console.error(`处理应用"${app.text}"出错: ${error.message}`);
           // 记录失败的应用
           failedApps.push({
             name: app.text,
