@@ -37,7 +37,7 @@ const data = [
         text: "Chrome",
         type: "浏览器",
         desc: "Chrome，不一样的浏览器体验",
-        icon: "/chrome.png",
+        icon: "/Chrome.png",
         link: "https://www.google.cn/intl/zh-CN/chrome/",
         tags: [{ text: "免费", type: "tip" }],
       },
