@@ -34,7 +34,7 @@ const data = [
         desc: "全新的收藏工具，帮助你收集和整理文章、网站和各类网页，超越普通书签和稍后阅读应用的功能。",
       },
       {
-        text: "Chrome",
+        text: "Google Chrome",
         type: "浏览器",
         desc: "Chrome，不一样的浏览器体验",
         icon: "/Chrome.png",
