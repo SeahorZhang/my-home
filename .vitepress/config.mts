@@ -6,7 +6,7 @@ export default defineConfig({
     socialLinks: [{ icon: "github", link: "https://github.com/SeahorZhang" }],
     editLink: {
       text: "为此页提供修改建议",
-      pattern: "https://github.com/SeahorZhang/my-home/blob/main/toolSoftware/data.ts",
+      pattern: "https://github.com/SeahorZhang/my-home/blob/main/:path",
     },
     lastUpdatedText: "最近更新时间",
     // footer: {
