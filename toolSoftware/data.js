@@ -168,7 +168,7 @@ export default [
       {
         text: "Downie",
         type: "视频下载",
-        icon: "icons/Downie.png",
+        icon: 'Downie.png',
         desc: "简单易用的视频下载工具，支持从YouTube、Vimeo等上千个网站下载视频，自动检测浏览器中的视频。",
         link: "https://software.charliemonroe.net/downie/",
         tags: [
@@ -181,7 +181,7 @@ export default [
       {
         text: "One Switch",
         type: "快捷按键",
-        icon: "icons/One Switch.png",
+        icon: 'One Switch.png',
         desc: "所有强大的开关都集中在一个地方。",
         link: "https://fireball.studio/oneswitch/",
         tags: [
@@ -275,7 +275,7 @@ export default [
         text: "App Cleaner & Uninstaller",
         type: "卸载",
         desc: "智能、直观且高效的Mac清理工具，用于卸载应用程序并管理各类扩展。",
-        icon: "icons/App Cleaner & Uninstaller.png",
+        icon: 'App Cleaner & Uninstaller.png',
         link: "https://nektony.com/mac-app-cleaner",
         tags: [
           {
@@ -295,7 +295,7 @@ export default [
           }
         ],
         desc: "专为macOS设计的独立广告拦截程序，提供比浏览器扩展更多功能，拦截各种应用内广告，保护隐私。",
-        icon: "icons/AdGuard.png"
+        icon: 'AdGuard.png'
       },
       {
         text: "Bartender",
@@ -329,7 +329,7 @@ export default [
       {
         text: "VMware Fusion",
         type: "虚拟机",
-        icon: "icons/VMware Fusion.png",
+        icon: 'VMware Fusion.png',
         desc: "强大的桌面虚拟化软件，允许Mac用户在macOS上运行Windows等其他操作系统，支持多种虚拟化需求。",
         link: "https://www.vmware.com/products/fusion.html",
         tags: [
