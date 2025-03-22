@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import data from "./data";
-import { withBase } from "vitepress";
+import IconComponent from "./IconComponent.vue";
 </script>
 
 <template>
   <template v-for="({ text, items }, i) in data" :key="i">
     <h3 class="mb-3">{{ text }}</h3>
-    <div class="grid grid-flow-row-dense gap-2.5 justify-center mt-2.5 grid-cols-[repeat(auto-fill,minmax(200px,1fr))]">
+    <div
+      class="grid grid-flow-row-dense gap-2.5 justify-center mt-2.5 grid-cols-[repeat(auto-fill,minmax(200px,1fr))]"
+    >
       <a
         v-for="(item, j) in items"
         :key="j"
@@ -14,21 +16,23 @@ import { withBase } from "vitepress";
         :href="item.link"
         target="_blank"
       >
-        <div class="flex items-center h-8 text-[var(--vp-c-text-1)]">
-          <img
-            v-if="item.icon"
-            :src="withBase('/img/toolSoftware' + item.icon)"
-            class="mr-2.5 h-8 w-8"
+        <div class="flex items-center h-8 text-[var(--vp-c-text-1)] gap-2.5">
+          <IconComponent
+            :appName="item.text"
+            :localIcon="item.icon"
+            :appUrl="item.link"
           />
-          <span>{{ item.text }}</span>
+          <div class="flex items-center h-8 text-[var(--vp-c-text-1)]">
+            <span>{{ item.text }}</span>
+          </div>
         </div>
-        <p 
+        <p
           class="flex-1 line-clamp-2 overflow-hidden text-ellipsis m-0 text-xs text-[var(--vp-c-text-2)]"
           :title="item.desc"
         >
           {{ item.desc }}
         </p>
-        <div class="flex items-center flex-wrap mt-1 [&>*]:mr-1 [&>*]:mb-1">
+        <div class="flex items-center flex-wrap [&>*]:mr-1 [&>*]:mt-1">
           <Badge
             v-for="tag in item.tags"
             :key="tag"

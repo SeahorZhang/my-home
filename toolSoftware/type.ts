@@ -6,7 +6,7 @@ interface ItemTag {
 interface Item {
   text: string;
   type?: string;
-  icon: string;
+  icon?: string;
   desc: string;
   link: string;
   github?: string;

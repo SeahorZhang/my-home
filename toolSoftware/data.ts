@@ -8,7 +8,6 @@ const data: Props[] = [
         text: "IINA",
         type: "播放器",
         desc: "适用于 macOS 的 现代 媒体播放器。",
-        icon: "/iina.png",
         link: "https://iina.io/",
         github: "https://github.com/iina/iina",
         tags: [{ text: "免费", type: "tip" }],
@@ -17,7 +16,7 @@ const data: Props[] = [
         text: "Infuse",
         type: "播放器",
         icon: "/Infuse.png",
-        link: "https://firecore.com/infuse",
+        link: "https://firecore.cn/infuse",
         tags: [{ text: "收费", type: "warning" }],
         desc: "Ignite your video content with Infuse - the beautiful way to watch almost any video format on your iPhone, iPad, Apple TV, and Mac. ",
       },
@@ -46,7 +45,6 @@ const data: Props[] = [
         text: "Itsycal",
         type: "日历",
         desc: "Itsycal 是一个微型菜单栏日历。如果需要，它会将您的事件显示为 Mac 日历应用程序的伴侣。",
-        icon: "/Itsycal.png",
         link: "https://www.mowglii.com/itsycal/",
         tags: [{ text: "免费", type: "tip" }],
       },
@@ -62,7 +60,6 @@ const data: Props[] = [
         text: "Strongbox",
         type: "密码记录",
         desc: "Never forget a password again with the most secure and powerful KeePass password manager on iPhone, iPad and Mac.",
-        icon: "/Strongbox.webp",
         link: "https://strongboxsafe.com/",
         tags: [{ text: "收费", type: "warning" }],
       },
@@ -77,8 +74,7 @@ const data: Props[] = [
       {
         text: "PasteNow",
         type: "剪贴板",
-        icon: "/PasteNow.webp",
-        link: "https://apps.apple.com/app/apple-store/id1552536109",
+        link: "https://pastenow.app/",
         tags: [{ text: "收费", type: "warning" }],
         desc: "PasteNow 是一款跨平台的剪贴板管理工具，专注在隐私与易用上，支持通过 icloud 在所有 jos 和 macos设备中同步剪贴板记录。你可以通过它存储各种各样的临时数据：文本、链接、图像等等，使日常工作更轻松和快捷。",
       },
@@ -94,7 +90,6 @@ const data: Props[] = [
       {
         text: "Manico",
         type: "小工具",
-        icon: "/Manico.png",
         link: "https://manico.im/#home",
         tags: [{ text: "收费", type: "warning" }],
         desc: "Manico 是一个为 macOS 设计的快速的 App 启动和切换工具",
@@ -107,7 +102,6 @@ const data: Props[] = [
       {
         text: "Homebrew",
         type: "App 管理",
-        icon: "/homebrew.svg",
         link: "https://brew.sh/",
         github: "https://github.com/Homebrew/brew",
         tags: [{ text: "免费", type: "tip" }],
@@ -124,7 +118,6 @@ const data: Props[] = [
       {
         text: "raycast",
         type: "启动器",
-        icon: "/raycast.png",
         link: "https://www.raycast.com/",
         tags: [
           { text: "基础免费", type: "tip" },
@@ -135,7 +128,6 @@ const data: Props[] = [
       {
         text: "proxyman",
         type: "拦截",
-        icon: "/proxyman.png",
         link: "https://proxyman.io/",
         tags: [
           { text: "基础免费", type: "tip" },
@@ -162,7 +154,6 @@ const data: Props[] = [
       {
         text: "AdGuard",
         type: "广告拦截",
-        icon: "/AdGuard.svg",
         link: "https://adguard.app/zh_cn/adguard-mac/overview.html",
         tags: [{ text: "收费", type: "warning" }],
         desc: "AdGuard for Mac 是世界上第一个专设计给 macOS 的独立广告拦截程序。其提供了比任何浏览器扩展还多的功能：拦截各种浏览器和应用内的广告，保护您的隐私。",
@@ -170,7 +161,6 @@ const data: Props[] = [
       {
         text: "Bartender",
         type: "状态栏",
-        icon: "/Bartender.png",
         link: "https://www.macbartender.com/",
         tags: [{ text: "收费", type: "warning" }],
         desc: "Bartender is an award-winning app for macOS that for more than 10 years has superpowered your menu bar, giving you total control over your menu bar items, what's displayed, and when, with menu bar items only showing when you need them. Bartender improves your workflow with quick reveal, search, custom hotkeys and triggers, and lots more.",
@@ -192,7 +182,7 @@ const data: Props[] = [
     text: "弃用",
     items: [
       {
-        text: "One Switch (弃用)",
+        text: "One Switch",
         type: "快捷按键",
         icon: "/OneSwitch.svg",
         desc: "所有强大的开关都集中在一个地方。",
@@ -206,7 +196,6 @@ const data: Props[] = [
         text: "MenubarX",
         type: "浏览器",
         desc: "MenubarX 是一款强大的 Mac 菜单栏浏览器，把网页添加到菜单栏上，像原生 App 一样即开即用，为你打开 Web Apps 的新世界。",
-        icon: "/MenubarX.png",
         link: "https://menubarx.app/",
         tags: [
           { text: "收费", type: "warning" },
