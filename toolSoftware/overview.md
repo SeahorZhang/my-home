@@ -41,6 +41,16 @@ const data = [
         link: "https://www.google.cn/intl/zh-CN/chrome/",
         tags: [{ text: "免费", type: "tip" }],
       },
+      {
+        text: "Spark",
+        type: "邮件客户端",
+        desc: "智能、直观的电子邮件客户端，帮助您轻松管理收件箱，支持多账户、智能通知和团队协作功能。",
+        link: "https://sparkmailapp.com/",
+        tags: [
+          { text: "基础免费", type: "tip" },
+          { text: "订阅", type: "warning" }
+        ],
+      },
     ],
   },
   {
