@@ -4,11 +4,13 @@ import { exec } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import util from "node:util";
+import { fileURLToPath } from "node:url";
 const execPromise = util.promisify(exec);
 
-// 配置选项
-const DEFAULT_OUTPUT_DIR = path.join(process.cwd(), "app-icons");
-const DEFAULT_SIZE = 64;
+// 固定配置选项
+const OUTPUT_DIR = path.join(process.cwd(), "toolSoftware", "icons");
+const ICON_SIZE = 64;
+const DATA_PATH = path.join(process.cwd(), "toolSoftware", "data.js");
 
 /**
  * 根据应用名称查找应用路径
@@ -43,17 +45,18 @@ async function findAppPath(appName) {
 }
 
 /**
- * 从应用提取图标
+ * 从应用提取图标并更新应用数据
  * @param {string} appPath 应用路径
  * @param {string} outputPath 输出路径
  * @param {number} size 图标大小
+ * @param {Object} app 应用对象
  * @returns {Promise<string>} 图标保存路径
  */
-async function extractIcon(appPath, outputPath, size) {
+async function extractIconAndUpdateApp(appPath, outputPath, size, app) {
   try {
-    const appName = path.basename(appPath, ".app");
+    const appName = app.text;
     const iconPath = path.join(outputPath, `${appName}.png`);
-console.log(1,iconPath)
+
     // 创建输出目录（如果不存在）
     if (!fs.existsSync(outputPath)) {
       fs.mkdirSync(outputPath, { recursive: true });
@@ -88,8 +91,11 @@ console.log(1,iconPath)
     await execPromise(
       `sips -s format png "${iconFile}" --out "${iconPath}" --resampleHeightWidth ${size} ${size}`
     );
-
-    console.log(`图标已保存到: ${iconPath}`);
+    
+    // 更新应用对象的icon属性
+    const relativePath = path.relative(process.cwd(), iconPath).replace(/\\/g, '/');
+    app.icon = `./icons/${path.basename(iconPath)}`;
+    
     return iconPath;
   } catch (error) {
     throw new Error(`提取图标出错: ${error.message}`);
@@ -97,58 +103,126 @@ console.log(1,iconPath)
 }
 
 /**
- * 主函数
+ * 保存更新后的数据到文件
+ * @param {string} filePath 文件路径
+ * @param {Array} data 更新后的数据数组
+ */
+async function saveDataToFile(filePath, data) {
+  try {
+    // 读取原始文件内容
+    const content = fs.readFileSync(filePath, 'utf-8');
+    
+    // 将数据转换为格式化的字符串
+    const dataStr = JSON.stringify(data, null, 2)
+      // 将JSON格式转换为JS格式
+      .replace(/"([^"]+)":/g, '$1:')
+      // 将双引号转换为单引号
+      .replace(/"/g, "'");
+    
+    // 查找原始数据部分
+    const exportMatch = content.match(/(export\s+(?:const|let|var)\s+data\s*=\s*)\[[\s\S]*?\](;?)/);
+    
+    if (!exportMatch) {
+      throw new Error('无法找到data导出声明');
+    }
+    
+    // 替换数据部分，保留导出声明
+    const updatedContent = content.replace(
+      exportMatch[0],
+      `${exportMatch[1]}${dataStr}${exportMatch[2]}`
+    );
+    
+    // 写入文件
+    fs.writeFileSync(filePath, updatedContent, 'utf-8');
+    console.log(`已更新数据文件: ${filePath}`);
+  } catch (error) {
+    throw new Error(`保存数据文件失败: ${error.message}`);
+  }
+}
+
+/**
+ * 主函数 - 直接处理数据文件中的所有应用
  */
 async function main() {
-  const args = process.argv.slice(2);
-
-  // 显示帮助信息
-  if (args.includes("--help") || args.includes("-h") || args.length === 0) {
-    console.log(`
-Mac应用图标获取工具
-
-用法:
-  macAppIconFetcher <应用名称> [选项]
-
-选项:
-  --output, -o   指定输出目录 (默认: ${DEFAULT_OUTPUT_DIR})
-  --size, -s     指定图标大小 (默认: ${DEFAULT_SIZE}px)
-  --help, -h     显示帮助信息
-
-示例:
-  macAppIconFetcher "Chrome"
-  macAppIconFetcher "Visual Studio Code" --output ./icons --size 256
-    `);
-    return;
-  }
-
-  // 解析参数
-  const appName = args[0];
-  let outputDir = DEFAULT_OUTPUT_DIR;
-  let iconSize = DEFAULT_SIZE;
-
-  for (let i = 1; i < args.length; i++) {
-    if (args[i] === "--output" || args[i] === "-o") {
-      outputDir = args[++i] || outputDir;
-    } else if (args[i] === "--size" || args[i] === "-s") {
-      iconSize = parseInt(args[++i], 10) || iconSize;
-    }
-  }
-
   try {
-    // 查找应用路径
-    console.log(`正在查找应用 "${appName}"...`);
-    const appPath = await findAppPath(appName);
-    console.log(`找到应用: ${appPath}`);
+    console.log("导入数据文件...");
+    
+    // 导入data.js
+    const dataModule = await import(DATA_PATH);
+    const data = dataModule.data || dataModule.default;
+    
+    // 记录是否有数据更新
+    let dataUpdated = false;
+    
+    // 确保输出目录存在
+    if (!fs.existsSync(OUTPUT_DIR)) {
+      fs.mkdirSync(OUTPUT_DIR, { recursive: true });
+    }
 
-    // 提取图标
-    console.log(`正在提取图标...`);
-    await extractIcon(appPath, outputDir, iconSize);
+    // 记录失败的应用
+    const failedApps = [];
+
+    // 遍历所有类别
+    for (const category of data) {
+      if (!Array.isArray(category.items)) continue;
+      
+      console.log(`处理类别: ${category.text}`);
+      
+      // 遍历类别中的所有应用
+      for (const app of category.items) {
+        if (!app.text) continue;
+        
+        try {
+          console.log(`处理应用: ${app.text}`);
+          // 查找应用路径
+          const appPath = await findAppPath(app.text);
+          
+          // 获取实际应用名称
+          const actualAppName = path.basename(appPath, ".app");
+          if (actualAppName !== app.text) {
+            console.log(`  应用名称差异: "${app.text}" -> "${actualAppName}"`);
+            // 更新应用名称为实际名称
+            app.text = actualAppName;
+            dataUpdated = true;
+          }
+          
+          // 提取图标并更新应用对象
+          await extractIconAndUpdateApp(appPath, OUTPUT_DIR, ICON_SIZE, app);
+          dataUpdated = true;
+        } catch (error) {
+          console.error(`  处理应用"${app.text}"出错: ${error.message}`);
+          // 记录失败的应用
+          failedApps.push({
+            name: app.text,
+            error: error.message
+          });
+        }
+      }
+    }
+    
+    // 如果有数据更新，保存到文件
+    if (dataUpdated) {
+      await saveDataToFile(DATA_PATH, data);
+    }
+    
+    // 输出处理结果
+    console.log("\n处理完成!");
+    
+    // 显示失败的应用
+    if (failedApps.length > 0) {
+      console.log(`\n以下 ${failedApps.length} 个应用处理失败:`);
+      failedApps.forEach((app, index) => {
+        console.log(`  ${index + 1}. ${app.name}: ${app.error}`);
+      });
+    } else {
+      console.log("所有应用处理成功!");
+    }
   } catch (error) {
     console.error(`错误: ${error.message}`);
     process.exit(1);
   }
 }
 
-// 运行主函数
+// 直接运行主函数
+console.log("Mac应用图标提取工具 - 开始处理");
 main();
