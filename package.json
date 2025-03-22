@@ -15,6 +15,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@clack/prompts": "^0.10.0",
     "@types/node": "^20.10.5",
     "vitepress": "1.6.3"
   },

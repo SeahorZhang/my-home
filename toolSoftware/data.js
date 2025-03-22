@@ -259,10 +259,10 @@ export default [
       //   desc: "一流的macOS原生应用，用于捕获、解密和模拟HTTP/HTTPS流量，提供全面的调试工具。"
       // },
       {
-        text: "网速&电池",
+        text: "网速 & 电池",
         type: "网速",
         desc: "实时网速 & 电池健康",
-        icon: "./icons/internetSpeed.png",
+        icon: '网速 & 电池.png',
         link: "https://apps.apple.com/cn/app/%E7%BD%91%E9%80%9F-%E7%94%B5%E6%B1%A0/id1387780159?mt=12",
         tags: [
           {
