@@ -2,6 +2,8 @@
 // 导入配置数据，提高可维护性
 import { personalInfo, projects, hobbies } from "./data";
 import { ref, onMounted } from "vue";
+import SnowfallBgaa from "../.vitepress/theme/SnowfallBg.vue";
+
 
 // 打包时间 - 使用构建时的时间
 const buildTime = __BUILD_TIME__;
@@ -44,6 +46,13 @@ onMounted(() => {
 
 <template>
   <div class="about-container" :class="{ 'is-visible': animationState.main }">
+    <SnowfallBgaa
+        color="ADD8E6"
+        class="absolute inset-0 -z-10"
+        :min-radius="0.2"
+        :max-radius="5"
+        :speed="0.5"
+      />
     <!-- 顶部个人介绍 -->
     <section class="hero-section">
       <div class="profile-layout">
@@ -56,7 +65,6 @@ onMounted(() => {
             <h2 class="profile-title">{{ personalInfo.title }}</h2>
           </div>
           <div class="bio-container">
-            <p class="profile-brief">{{ personalInfo.bio }}</p>
             <p class="profile-bio">
               👋 你好！我是一名充满热情的技术爱好者和创造者。
               我坚信技术能力不该仅限于职场，并致力于探索独立开发者的自由之路。

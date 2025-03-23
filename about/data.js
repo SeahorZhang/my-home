@@ -1,7 +1,6 @@
 export const personalInfo = {
   name: 'Seahor',
-  title: '前端开发工程师',
-  bio: '热爱技术 | 开源贡献者 | 生活探索者',
+  title: '白天社畜打工人 晚上独立开发者',
   avatar: '/default.svg',
   socialLinks: [
     { icon: 'github', link: 'https://github.com/SeahorZhang', label: 'GitHub' },
