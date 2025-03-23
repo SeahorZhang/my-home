@@ -84,10 +84,10 @@ onMounted(() => {
       </div>
     </section>
 
-    <!-- 项目展示 -->
-    <section class="content-section">
+    <!-- 项目展示 - 优化版 -->
+    <section class="content-section projects-section">
       <div class="section-header">
-        <h2 class="section-title">项目经历</h2>
+        <h2 class="section-title">开发项目</h2>
         <div class="section-divider"></div>
       </div>
       <div class="projects-grid">
@@ -99,21 +99,18 @@ onMounted(() => {
         >
           <div class="card-image-container">
             <img :src="project.image" :alt="project.title" class="card-image" />
+            <span class="project-type-badge">Chrome扩展</span>
+            <div class="card-overlay">
+              <a :href="project.link" class="view-project-btn" target="_blank">
+                查看项目
+              </a>
+            </div>
           </div>
           <div class="card-content">
             <h3 class="card-title">{{ project.title }}</h3>
             <p class="card-description">{{ project.description }}</p>
-            <div class="tags-container">
-              <span
-                v-for="(tag, tagIndex) in project.tags"
-                :key="tagIndex"
-                class="tag"
-              >
-                {{ tag }}
-              </span>
-            </div>
             <a :href="project.link" class="card-link" target="_blank">
-              查看项目 <span class="arrow">→</span>
+              了解更多 <span class="arrow">→</span>
             </a>
           </div>
         </div>
@@ -227,8 +224,13 @@ onMounted(() => {
 }
 
 @keyframes floatAnimation {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 /* 添加媒体查询，优化小屏幕下的头像大小和动画 */
@@ -237,12 +239,17 @@ onMounted(() => {
     @apply size-36 mx-auto;
     animation: floatAnimation 6s ease-in-out infinite;
   }
-  
+
   @keyframes floatAnimation {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-5px); } /* 减小动画幅度 */
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-5px);
+    } /* 减小动画幅度 */
   }
-  
+
   .profile-layout {
     @apply gap-8; /* 减小间距 */
   }
@@ -279,7 +286,7 @@ onMounted(() => {
 }
 
 .profile-name::after {
-  content: '';
+  content: "";
   @apply absolute bottom-0 left-0 h-1 bg-gradient-to-r from-primary-500 to-primary-700;
   width: 60px;
   border-radius: 2px;
@@ -335,11 +342,16 @@ onMounted(() => {
 
 .dark .social-link {
   background: linear-gradient(145deg, #2a2a2d, #222225);
-  box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.2), -3px -3px 6px rgba(60, 60, 65, 0.1);
+  box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.2),
+    -3px -3px 6px rgba(60, 60, 65, 0.1);
 }
 
 .dark .social-link:hover {
-  background: linear-gradient(145deg, var(--accent-color), var(--accent-darker));
+  background: linear-gradient(
+    145deg,
+    var(--accent-color),
+    var(--accent-darker)
+  );
 }
 
 /* 内容区块 */
@@ -352,11 +364,14 @@ onMounted(() => {
 }
 
 .section-title {
-  @apply text-3xl font-bold text-gray-800 mb-3 inline-block;
+  @apply text-2xl font-bold text-gray-800 mb-3 inline-block px-4 py-2 rounded-full;
+  background-color: rgba(14, 165, 233, 0.1);
+  color: var(--accent-color);
 }
 
 .dark .section-title {
   color: var(--text-primary-dark);
+  background-color: rgba(14, 165, 233, 0.15);
 }
 
 .section-divider {
@@ -364,20 +379,54 @@ onMounted(() => {
   background: linear-gradient(90deg, var(--accent-color), var(--accent-dark));
 }
 
-/* 项目卡片 */
+/* 项目展示部分 - 现代化样式 */
+.projects-section {
+  @apply py-16;
+  background-color: var(--content-bg-light);
+  position: relative;
+  overflow: hidden;
+}
+
+.dark .projects-section {
+  background-color: var(--content-bg-dark);
+}
+
+/* 增加背景装饰 */
+.projects-section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(14, 165, 233, 0.05) 0%, rgba(14, 165, 233, 0) 70%);
+  z-index: 0;
+  border-radius: 50%;
+  transform: translate(30%, -30%);
+}
+
+.section-badge {
+  @apply inline-block px-3 py-1 text-xs font-medium rounded-full mb-4;
+ 
+}
+
 .projects-grid {
   @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto;
 }
 
+/* 项目卡片现代化设计 */
 .project-card {
-  @apply rounded-xl overflow-hidden shadow-md 
-         transition-all duration-500 opacity-0 transform scale-95;
+  @apply rounded-2xl overflow-hidden transition-all duration-500 opacity-0 transform scale-95;
   background-color: var(--card-bg-light);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(224, 242, 254, 0.2);
+  height: 100%;
 }
 
 .dark .project-card {
   background-color: var(--card-bg-dark);
-  box-shadow: var(--shadow-sm-dark);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(64, 71, 86, 0.2);
 }
 
 .project-card.is-visible {
@@ -386,31 +435,83 @@ onMounted(() => {
 
 .project-card:hover {
   @apply transform -translate-y-2;
-  box-shadow: var(--shadow-md-dark);
+  box-shadow: 0 10px 30px rgba(14, 165, 233, 0.15);
 }
 
 .dark .project-card:hover {
-  box-shadow: var(--shadow-md-dark);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
+/* 图片容器增强 */
 .card-image-container {
-  @apply h-44 overflow-hidden;
+  @apply h-52 overflow-hidden relative;
 }
 
 .card-image {
   @apply w-full h-full object-cover transition-transform duration-700;
+  filter: brightness(0.95);
 }
 
 .project-card:hover .card-image {
   @apply transform scale-105;
+  filter: brightness(1);
 }
 
+/* 覆盖层效果 */
+.card-overlay {
+  @apply absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
+}
+
+.project-card:hover .card-overlay {
+  @apply opacity-100;
+}
+
+.view-project-btn {
+  @apply px-4 py-2 bg-white text-gray-800 rounded-full text-sm font-medium 
+         transform translate-y-4 transition-transform duration-300;
+}
+
+.project-card:hover .view-project-btn {
+  @apply translate-y-0;
+}
+
+.view-project-btn:hover {
+  @apply bg-primary-500 text-white;
+}
+
+.dark .view-project-btn {
+  @apply bg-gray-800 text-white;
+}
+
+.dark .view-project-btn:hover {
+  @apply bg-primary-600;
+}
+
+/* 角标样式增强 */
+.project-type-badge {
+  @apply absolute top-3 left-3 bg-primary-500 text-white text-xs font-medium py-1 px-3 rounded-full;
+  z-index: 2;
+  box-shadow: 0 2px 6px rgba(14, 165, 233, 0.4);
+}
+
+.dark .project-type-badge {
+  @apply bg-primary-600;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* 内容区样式增强 */
 .card-content {
   @apply p-6;
 }
 
 .card-title {
   @apply text-xl font-semibold text-gray-800 mb-3;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .dark .card-title {
@@ -418,33 +519,24 @@ onMounted(() => {
 }
 
 .card-description {
-  @apply text-sm text-gray-600 mb-4 line-clamp-3;
+  @apply text-sm text-gray-600 mb-6 line-clamp-3 h-16;
 }
 
 .dark .card-description {
   color: var(--text-secondary-dark);
 }
 
-.tags-container {
-  @apply flex flex-wrap gap-2 mb-5;
-}
-
-.tag {
-  @apply text-xs px-2 py-1 rounded text-primary-800;
-  background-color: rgba(14, 165, 233, 0.1);
-}
-
-.dark .tag {
-  background-color: rgba(14, 165, 233, 0.1);
-  color: #7dd3fc;
-}
-
 .card-link {
-  @apply inline-flex items-center text-primary-600 font-medium text-sm;
+  @apply inline-flex items-center text-primary-600 font-medium text-sm transition-all duration-200;
+  border-bottom: 1px dotted transparent;
 }
 
 .dark .card-link {
-  color: #38bdf8; /* 亮蓝色，暗模式下更易辨识 */
+  color: #38bdf8;
+}
+
+.card-link:hover {
+  @apply border-primary-500;
 }
 
 .card-link:hover .arrow {
