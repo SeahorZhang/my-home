@@ -4,15 +4,15 @@ import { COLORS, colorize } from './utils.js';
 import { logger } from './logger.js';
 
 /**
- * Display interactive menu for user selection
- * @returns {Promise<boolean>} Whether to process only missing icons
+ * 显示交互式菜单供用户选择
+ * @returns {Promise<boolean>} 是否只处理缺少图标的应用
  */
 export async function showMenu() {
   try {
-    // Initialize prompts
+    // 初始化提示
     prompts.intro("Mac应用图标提取工具");
 
-    // Create menu options
+    // 创建菜单选项
     const mode = await prompts.select({
       message: "请选择处理模式",
       options: [
@@ -21,7 +21,7 @@ export async function showMenu() {
       ],
     });
 
-    // User cancelled with Ctrl+C
+    // 用户按Ctrl+C取消
     if (prompts.isCancel(mode)) {
       prompts.cancel("操作已取消");
       process.exit(0);
@@ -30,7 +30,7 @@ export async function showMenu() {
     const modeText = mode ? "只处理缺少图标的应用" : "处理所有应用";
     prompts.log.success(`已选择: ${modeText}`);
 
-    // End interaction
+    // 结束交互
     prompts.outro("开始处理应用...");
 
     return mode;
@@ -42,8 +42,8 @@ export async function showMenu() {
 }
 
 /**
- * Parse command line arguments
- * @returns {boolean} Whether to show the menu
+ * 解析命令行参数
+ * @returns {boolean} 是否显示菜单
  */
 export function parseArgs() {
   const args = process.argv.slice(2);
@@ -71,7 +71,7 @@ export function parseArgs() {
 }
 
 /**
- * Display help information
+ * 显示帮助信息
  */
 export function showHelp() {
   console.log(`

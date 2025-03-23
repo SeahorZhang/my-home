@@ -1,7 +1,7 @@
 import { COLORS, colorize, createTimer } from './utils.js';
 
 /**
- * Logger with colorized output
+ * 带颜色输出的日志记录器
  */
 export const logger = {
   info: (message) => console.log(message),
@@ -12,7 +12,7 @@ export const logger = {
 };
 
 /**
- * Progress tracking utility
+ * 进度跟踪工具
  */
 export const progress = {
   total: 0,

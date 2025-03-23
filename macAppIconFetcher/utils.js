@@ -3,10 +3,10 @@ import path from "node:path";
 import util from "node:util";
 import { exec } from "node:child_process";
 
-// Promisified exec function
+// 将exec函数转为Promise
 export const execPromise = util.promisify(exec);
 
-// ===== Color constants =====
+// ===== 颜色常量 =====
 export const COLORS = {
   red: "\x1b[31m",
   green: "\x1b[32m",
@@ -17,38 +17,38 @@ export const COLORS = {
 };
 
 /**
- * Apply color to text
- * @param {string} text Text to colorize
- * @param {string} color Color code
- * @returns {string} Colorized text
+ * 为文本添加颜色
+ * @param {string} text 要着色的文本
+ * @param {string} color 颜色代码
+ * @returns {string} 着色后的文本
  */
 export function colorize(text, color) {
   return `${color}${text}${COLORS.reset}`;
 }
 
 /**
- * Remove .app suffix from app name
- * @param {string} name App name
- * @returns {string} Name without .app suffix
+ * 移除应用名称中的.app后缀
+ * @param {string} name 应用名称
+ * @returns {string} 去除.app后缀的名称
  */
 export function removeAppSuffix(name) {
   return name.replace(/\.app$/i, "");
 }
 
 /**
- * Escape special characters in string for RegExp
- * @param {string} string String to escape
- * @returns {string} Escaped string
+ * 转义正则表达式特殊字符
+ * @param {string} string 要转义的字符串
+ * @returns {string} 转义后的字符串
  */
 export function escapeRegExp(string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 /**
- * Safely execute a command and handle errors
- * @param {string} command Command to execute
- * @param {string} errorMessage Error message prefix
- * @returns {Promise<string>} Command output
+ * 安全执行命令并处理错误
+ * @param {string} command 要执行的命令
+ * @param {string} errorMessage 错误消息前缀
+ * @returns {Promise<string>} 命令输出
  */
 export async function safeExec(command, errorMessage) {
   try {
@@ -63,8 +63,8 @@ export async function safeExec(command, errorMessage) {
 }
 
 /**
- * Create a timer object
- * @returns {Object} Timer object with elapsed and reset methods
+ * 创建计时器对象
+ * @returns {Object} 带有elapsed和reset方法的计时器对象
  */
 export function createTimer() {
   const startTime = Date.now();
@@ -75,11 +75,11 @@ export function createTimer() {
 }
 
 /**
- * Execute a function with retry capability
- * @param {Function} fn Function to execute
- * @param {number} retries Number of retry attempts
- * @param {number} delay Delay between retries in ms
- * @returns {Promise<any>} Function result
+ * 使用重试机制执行函数
+ * @param {Function} fn 要执行的函数
+ * @param {number} retries 重试次数
+ * @param {number} delay 重试间隔(毫秒)
+ * @returns {Promise<any>} 函数结果
  */
 export async function withRetry(fn, retries = 2, delay = 500) {
   try {
@@ -111,25 +111,25 @@ export async function promisePool(items, fn, concurrency) {
 }
 
 /**
- * Pre-warm file system cache
- * @param {string} directory Directory to warm
+ * 预热文件系统缓存
+ * @param {string} directory 要预热的目录
  */
 export async function preWarmFileSystem(directory) {
   try {
-    // Read output directory contents to cache
+    // 读取输出目录内容到缓存
     if (fs.existsSync(directory)) {
       const files = fs.readdirSync(directory);
       for (const file of files.slice(0, 10)) {
         try {
-          // Just read metadata for a few files to activate FS cache
+          // 只读取几个文件的元数据来激活文件系统缓存
           fs.statSync(path.join(directory, file));
         } catch (e) {
-          // Ignore individual file errors
+          // 忽略单个文件错误
         }
       }
     }
   } catch (e) {
-    // Ignore warming errors
+    // 忽略预热错误
   }
 }
 

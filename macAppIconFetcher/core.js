@@ -4,12 +4,12 @@ import { CONFIG, CACHE } from './config.js';
 import { logger, progress } from './logger.js';
 import { withRetry, safeExec, promisePool, removeAppSuffix, escapeRegExp } from './utils.js';
 
-// ================ Finder 功能 ================
+// ================ 查找器功能 ================
 
 /**
- * Find app path by name
- * @param {string} appName App name
- * @returns {Promise<string>} App path
+ * 通过名称查找应用路径
+ * @param {string} appName 应用名称
+ * @returns {Promise<string>} 应用路径
  */
 export async function findAppPath(appName) {
   try {
@@ -40,9 +40,9 @@ export async function findAppPath(appName) {
 }
 
 /**
- * Get app display name using multiple methods
- * @param {string} appPath App path
- * @returns {Promise<string>} App display name
+ * 使用多种方法获取应用显示名称
+ * @param {string} appPath 应用路径
+ * @returns {Promise<string>} 应用显示名称
  */
 export async function getAppDisplayName(appPath) {
   try {
@@ -78,10 +78,10 @@ export async function getAppDisplayName(appPath) {
 }
 
 /**
- * Find app icon file in application bundle
- * @param {string} appPath App path
- * @param {string} appName App name
- * @returns {Promise<string>} Icon file path
+ * 在应用包中查找图标文件
+ * @param {string} appPath 应用路径
+ * @param {string} appName 应用名称
+ * @returns {Promise<string>} 图标文件路径
  */
 export async function findAppIconFile(appPath, appName) {
   try {
@@ -141,9 +141,9 @@ export async function findAppIconFile(appPath, appName) {
 }
 
 /**
- * Check if app is missing an icon
- * @param {Object} app App object
- * @returns {boolean} Whether icon is missing
+ * 检查应用是否缺少图标
+ * @param {Object} app 应用对象
+ * @returns {boolean} 是否缺少图标
  */
 export function isIconMissing(app) {
   if (!app.icon) return true;
@@ -154,10 +154,10 @@ export function isIconMissing(app) {
 // ================ Processor 功能 ================
 
 /**
- * Extract app icon and update app data
- * @param {string} appPath App path
- * @param {Object} app App object
- * @returns {Promise<string>} Icon save path
+ * 提取应用图标并更新应用数据
+ * @param {string} appPath 应用路径
+ * @param {Object} app 应用对象
+ * @returns {Promise<string>} 图标保存路径
  */
 export async function extractIconAndUpdateApp(appPath, app) {
   // Pre-check to avoid duplicate work
@@ -217,12 +217,12 @@ export async function extractIconAndUpdateApp(appPath, app) {
 }
 
 /**
- * Update app fields in data file content
- * @param {Object} originalApp Original app object
- * @param {Object} updatedApp Updated app object
- * @param {string} content File content
- * @param {Function} updateContent Content update callback
- * @returns {number} Number of updated fields
+ * 更新应用字段并在内容中替换
+ * @param {Object} originalApp 原始应用对象
+ * @param {Object} updatedApp 更新后的应用对象
+ * @param {string} content 文件内容
+ * @param {Function} updateContent 内容更新函数
+ * @returns {Object} 更新结果
  */
 export function updateAppFields(originalApp, updatedApp, content, updateContent) {
   let count = 0;
@@ -270,10 +270,10 @@ export function updateAppFields(originalApp, updatedApp, content, updateContent)
 }
 
 /**
- * Save updated data to file
- * @param {string} filePath File path
- * @param {Array} updatedData Updated data
- * @returns {Promise<number>} Number of updated fields
+ * 保存数据到文件
+ * @param {string} filePath 文件路径
+ * @param {Array} updatedData 更新后的数据
+ * @returns {Promise<number>} 更新字段数
  */
 export async function saveDataToFile(filePath, updatedData) {
   try {
@@ -332,9 +332,9 @@ export async function saveDataToFile(filePath, updatedData) {
 }
 
 /**
- * Process single app
- * @param {Object} app App object
- * @returns {Promise<Object>} Processing result
+ * 处理单个应用
+ * @param {Object} app 应用对象
+ * @returns {Promise<Object>} 处理结果
  */
 export async function processApp(app) {
   try {
@@ -382,9 +382,9 @@ export async function processApp(app) {
 }
 
 /**
- * Process app categories in parallel
- * @param {Array} categories App categories array
- * @returns {Promise<Object>} Processing results
+ * 并行处理应用分类
+ * @param {Array} categories 应用分类数组
+ * @returns {Promise<Object>} 处理结果
  */
 export async function processCategories(categories) {
   // 确保 categories 是一个数组

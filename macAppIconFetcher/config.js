@@ -1,7 +1,7 @@
 import path from "node:path";
 
 /**
- * Application configuration
+ * 应用配置
  */
 export const CONFIG = {
   paths: {
@@ -17,7 +17,7 @@ export const CONFIG = {
 };
 
 /**
- * Cache for expensive operations
+ * 缓存昂贵操作的结果
  */
 export const CACHE = {
   appPaths: new Map(),

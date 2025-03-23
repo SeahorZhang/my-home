@@ -8,17 +8,17 @@ import { parseArgs, showMenu } from './ui.js';
 import { processCategories, saveDataToFile } from './core.js';
 
 /**
- * Main function - application entry point
+ * 主函数 - 应用入口点
  */
 async function main() {
   const startTime = Date.now();
   
   try {
-    // Check environment and parse args
+    // 检查环境和解析参数
     await checkEnvironment();
     CONFIG.onlyMissingIcons = parseArgs() ? await showMenu() : CONFIG.onlyMissingIcons;
     
-    // Load data
+    // 加载数据
     logger.info("加载数据文件...");
     const dataModule = await import(CONFIG.paths.data);
     // 处理不同的导出格式
@@ -32,15 +32,15 @@ async function main() {
       logger.warn("数据文件中没有找到应用数据");
     }
     
-    // Process categories
+    // 处理分类
     const { dataUpdated, failedApps, skippedApps } = await processCategories(data);
     if (dataUpdated) await saveDataToFile(CONFIG.paths.data, data);
     
-    // Output statistics
+    // 输出统计信息
     const totalTime = (Date.now() - startTime) / 1000;
     logger.success(colorize(`\n处理完成! 总耗时: ${totalTime.toFixed(2)}秒`, COLORS.green));
     
-    // Display results
+    // 显示结果
     outputResults(data, failedApps, skippedApps);
   } catch (error) {
     logger.error(error.message);
@@ -48,7 +48,7 @@ async function main() {
   }
 }
 
-// Run main function
+// 运行主函数
 logger.info(colorize("Mac应用图标提取工具 - 开始处理", COLORS.cyan));
 main();
 
