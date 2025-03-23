@@ -45,19 +45,21 @@ export default defineConfig({
       },
     ],
     aside: false,
-    primaryColor: "#409EFF",
   },
   vite: {
     define: {
-      __BUILD_TIME__: JSON.stringify(new Date().toLocaleString('zh-CN', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: false
-      }))
+      __BUILD_TIME__: JSON.stringify(
+        new Date().toLocaleString('zh-CN', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: false,
+          timeZone: 'Asia/Shanghai'
+        })
+      )
     }
   }
 });
