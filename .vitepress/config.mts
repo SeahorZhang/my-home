@@ -45,6 +45,7 @@ export default defineConfig({
       },
     ],
     aside: false,
+    primaryColor: "#409EFF",
   },
   vite: {
     define: {

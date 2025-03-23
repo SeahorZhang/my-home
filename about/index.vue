@@ -193,6 +193,7 @@ onMounted(() => {
 /* 容器与布局 */
 .about-container {
   @apply opacity-0 transition-all duration-500;
+  background-color: var(--content-bg-light);
 }
 
 .dark .about-container {
@@ -216,47 +217,25 @@ onMounted(() => {
 }
 
 .profile-layout {
-  @apply flex flex-col items-center md:flex-row md:items-start md:gap-16 max-w-5xl mx-auto;
+  @apply flex flex-col md:flex-row md:items-start md:gap-16 max-w-5xl mx-auto;
 }
 
-/* 头像样式优化 - 移动端响应式调整 */
+/* 头像样式优化 */
 .avatar-wrapper {
-  @apply relative;
-  /* 移动端尺寸更小，居中显示 */
-  @apply size-40 mx-auto mb-8;
-  /* 中等屏幕以上增大尺寸 */
-  @apply md:size-48 md:mx-0 md:mb-0;
+  @apply mb-10 md:mb-0 relative size-48;
   animation: floatAnimation 6s ease-in-out infinite;
 }
 
-/* 全局动画定义 - 适用于所有屏幕尺寸 */
 @keyframes floatAnimation {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-10px); }
 }
 
-/* 小屏幕特定样式 */
-@media (max-width: 768px) {
-  .avatar-wrapper {
-    /* 在小屏幕上减弱浮动效果 */
-    animation: floatAnimation 8s ease-in-out infinite 0.3s;
-  }
-  
-  /* 小屏幕特定动画 - 覆盖全局定义 */
-  @keyframes floatAnimation {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-5px); } /* 小屏幕上减小浮动距离 */
-  }
-}
-
 .avatar {
-  @apply size-full transition-all duration-500;
-  /* 确保填充整个容器，但保留一些内边距 */
-  @apply p-2 md:p-4;
-  /* 使边框更容易在小屏幕上看到 */
+  @apply size-full p-4 transition-all duration-500;
   border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
-  border: 3px solid rgba(224, 242, 254, 0.3);
-  box-shadow: 0 10px 20px rgba(14, 165, 233, 0.12);
+  box-shadow: 0 10px 30px rgba(14, 165, 233, 0.15);
+  border: 4px solid rgba(224, 242, 254, 0.3);
 }
 
 .dark .avatar {
@@ -266,8 +245,7 @@ onMounted(() => {
 
 /* 个人信息样式优化 */
 .profile-info {
-  @apply flex flex-col items-center md:items-start space-y-4 md:space-y-6;
-  @apply w-full;
+  @apply flex flex-col items-center md:items-start space-y-6;
 }
 
 .name-title-container {
@@ -275,7 +253,7 @@ onMounted(() => {
 }
 
 .profile-name {
-  @apply text-4xl md:text-5xl font-bold mb-2 md:mb-3 text-transparent bg-clip-text relative;
+  @apply text-5xl font-bold mb-3 text-transparent bg-clip-text relative;
   background-image: linear-gradient(
     90deg,
     var(--accent-color),
@@ -283,16 +261,12 @@ onMounted(() => {
   );
 }
 
-/* 确保下划线在小屏幕上居中 */
 .profile-name::after {
   content: '';
-  @apply h-1 bg-gradient-to-r from-primary-500 to-primary-700;
+  @apply absolute bottom-0 left-0 h-1 bg-gradient-to-r from-primary-500 to-primary-700;
   width: 60px;
   border-radius: 2px;
   transform: translateY(8px);
-  
-  /* 小屏幕居中，大屏幕左对齐 */
-  @apply absolute bottom-0 left-1/2 -translate-x-1/2 md:left-0 md:translate-x-0;
 }
 
 .dark .profile-name::after {
@@ -300,7 +274,7 @@ onMounted(() => {
 }
 
 .profile-title {
-  @apply text-lg md:text-xl font-medium text-gray-600 mt-4 md:mt-6;
+  @apply text-xl font-medium text-gray-600 mt-6;
 }
 
 .dark .profile-title {
@@ -309,8 +283,7 @@ onMounted(() => {
 
 /* 个人简介样式 */
 .bio-container {
-  @apply space-y-3 md:space-y-4 text-center md:text-left max-w-full md:max-w-2xl;
-  @apply px-4 md:px-0;
+  @apply space-y-4 text-center md:text-left max-w-2xl;
 }
 
 .profile-brief {
@@ -328,14 +301,13 @@ onMounted(() => {
 
 /* 社交链接样式 */
 .social-links-container {
-  @apply flex gap-3 md:gap-4 justify-center md:justify-start mt-2;
+  @apply flex gap-4 justify-center md:justify-start mt-2;
 }
 
 .social-link {
-  /* 小屏幕上稍微小一些的图标 */
-  @apply size-9 md:size-10 flex items-center justify-center rounded-full transition-all duration-300;
+  @apply flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300;
   background: linear-gradient(145deg, #f8fafc, #e6edf5);
-  box-shadow: 2px 2px 5px #d1d9e2, -2px -2px 5px #ffffff;
+  box-shadow: 3px 3px 6px #d1d9e2, -3px -3px 6px #ffffff;
 }
 
 .social-link:hover {

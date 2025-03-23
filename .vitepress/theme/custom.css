@@ -1,49 +1,44 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary-50: #f0f9ff;
-  --color-primary-100: #e0f2fe;
-  --color-primary-200: #bae6fd;
-  --color-primary-300: #7dd3fc;
-  --color-primary-400: #38bdf8;
-  --color-primary-500: #0ea5e9;
-  --color-primary-600: #0284c7;
-  --color-primary-700: #0369a1;
-  --color-primary-800: #075985;
-  --color-primary-900: #0c4a6e;
-  --color-primary-950: #082f49;
+  --color-primary-50: #edf5ff;
+  --color-primary-100: #d8eaff;
+  --color-primary-200: #b8d8ff;
+  --color-primary-300: #8ec2ff;
+  --color-primary-400: #66adff;
+  --color-primary-500: #409EFF;
+  --color-primary-600: #3183e4;
+  --color-primary-700: #2368c4;
+  --color-primary-800: #1e56a0;
+  --color-primary-900: #1b4985;
   --color-primary-DEFAULT: var(--color-primary-500);
 }
 
-/* 颜色变量 - 统一所有主题色，以1B1B1F为暗色主调 */
+/* 新的主题色系统 - 基于 #409EFF */
 :root {
-  /* 基础色调 */
+  /* 基础变量更新 */
+  --accent-color: var(--color-primary-500);
+  --accent-dark: var(--color-primary-600);
+  --accent-darker: var(--color-primary-700);
+  --accent-light: var(--color-primary-300);
+
+  /* 背景色系 */
+  --hero-bg-light: rgba(237, 245, 255, 0.6);
+  --hero-bg-dark: rgba(30, 86, 160, 0.08);
+
+  /* 卡片背景 */
   --card-bg-light: #ffffff;
-  --card-bg-dark: #222225; /* 略微亮于背景的卡片色 */
-  --content-bg-light: #f8fafc;
-  --content-bg-dark: #1B1B1F; /* 主要暗色背景 */
-  
+  --card-bg-dark: #222225;
+
   /* 文本颜色 */
-  --text-primary-dark: #e6e6e9; /* 主文本略亮 */
-  --text-secondary-dark: #a1a1a8; /* 次要文本 */
-  --text-muted-dark: #71717a; /* 弱化文本 */
-  
-  /* 边框和分割线 */
-  --border-dark: #2e2e35; /* 略微亮于背景的边框 */
-  
-  /* 强调色和渐变 */
-  --accent-color: #0ea5e9;
-  --accent-dark: #0284c7;
-  --accent-darker: #0369a1;
-  
+  --text-primary-dark: #e6e6e9;
+  --text-secondary-dark: #a1a1a8;
+
   /* 阴影 */
-  --shadow-color-dark: rgba(0, 0, 0, 0.5);
+  --primary-shadow-light: rgba(64, 158, 255, 0.15);
+  --primary-shadow-dark: rgba(48, 108, 180, 0.25);
   --shadow-sm-dark: 0 4px 8px rgba(0, 0, 0, 0.2);
   --shadow-md-dark: 0 8px 16px rgba(0, 0, 0, 0.25);
-  
-  /* 区域背景 */
-  --hero-bg-light: rgba(224, 242, 254, 0.2);
-  --hero-bg-dark: #222225; /* 略微亮于主背景的区域 */
 }
 
 .vp-doc a {
