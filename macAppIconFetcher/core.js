@@ -13,12 +13,12 @@ import { withRetry, safeExec, promisePool, removeAppSuffix, escapeRegExp } from 
  */
 export async function findAppPath(appName) {
   try {
-    // Check cache
+    // 检查缓存
     if (CACHE.appPaths.has(appName)) {
       return CACHE.appPaths.get(appName);
     }
 
-    // Optimized query - find and cache multiple apps at once
+    // 优化查询 - 一次性查找并缓存多个应用
     const exactQuery = `mdfind "kMDItemContentType == 'com.apple.application-bundle' && kMDItemDisplayName == '${appName}'" | head -1`;
     let appPath = await safeExec(exactQuery);
 
@@ -31,7 +31,7 @@ export async function findAppPath(appName) {
       throw new Error(`找不到应用 "${appName}"`);
     }
 
-    // Save to cache
+    // 保存到缓存
     CACHE.appPaths.set(appName, appPath);
     return appPath;
   } catch (error) {
@@ -46,12 +46,12 @@ export async function findAppPath(appName) {
  */
 export async function getAppDisplayName(appPath) {
   try {
-    // Check cache
+    // 检查缓存
     if (CACHE.displayNames.has(appPath)) {
       return CACHE.displayNames.get(appPath);
     }
 
-    // Use the most reliable method first
+    // 首先使用最可靠的方法
     try {
       const appleScript = `tell application "Finder" to get displayed name of (POSIX file "${appPath}" as alias)`;
       const displayedName = await safeExec(`osascript -e '${appleScript}'`);
@@ -62,16 +62,16 @@ export async function getAppDisplayName(appPath) {
         return result;
       }
     } catch (e) {
-      // Ignore error, try next method
+      // 忽略错误，尝试下一种方法
     }
     
-    // Use file name (without .app suffix) as fallback
+    // 使用文件名(不带.app后缀)作为后备方案
     const basename = path.basename(appPath, ".app");
     const result = removeAppSuffix(basename);
     CACHE.displayNames.set(appPath, result);
     return result;
   } catch (error) {
-    // Use file name on error
+    // 出错时使用文件名
     const basename = path.basename(appPath, ".app");
     return removeAppSuffix(basename);
   }
@@ -151,7 +151,7 @@ export function isIconMissing(app) {
   return !fs.existsSync(iconPath);
 }
 
-// ================ Processor 功能 ================
+// ================ 处理器功能 ================
 
 /**
  * 提取应用图标并更新应用数据
@@ -160,56 +160,45 @@ export function isIconMissing(app) {
  * @returns {Promise<string>} 图标保存路径
  */
 export async function extractIconAndUpdateApp(appPath, app) {
-  // Pre-check to avoid duplicate work
+  // 预检查以避免重复工作
   if (app.icon) {
     const iconPath = path.join(CONFIG.paths.output, app.icon);
     if (fs.existsSync(iconPath)) {
-      // Check file size to ensure it's not empty or corrupt
+      // 检查文件大小确保不是空文件或损坏文件
       const stats = fs.statSync(iconPath);
-      if (stats.size > 1000) { // A valid icon should be at least 1KB
-        return iconPath; // Skip silently
+      if (stats.size > 1000) { // 有效图标至少应有1KB
+        return iconPath; // 静默跳过
       }
     }
   }
 
   try {
-    // Use app name as icon file name, ensure no .app suffix
+    // 使用应用名称作为图标文件名，确保没有.app后缀
     const appName = removeAppSuffix(app.text);
     const iconFileName = `${appName}.png`;
     const iconPath = path.join(CONFIG.paths.output, iconFileName);
     
-    // Find and extract icon
+    // 查找并提取图标
     await withRetry(async () => {
       const iconFile = await findAppIconFile(appPath, appName);
       
-      // Extract icon - use unified extraction command
+      // 提取图标 - 使用统一的提取命令
       await safeExec(
         `sips -s format png "${iconFile}" --out "${iconPath}" --resampleHeightWidth ${CONFIG.iconSize} ${CONFIG.iconSize}`,
         "提取图标失败"
       );
       
-      // Check extraction result
-      if (!fs.existsSync(iconPath) || fs.statSync(iconPath).size < 1000) {
-        // If extraction failed, try directly from the app
-        await safeExec(
-          `sips -s format png "${appPath}" --out "${iconPath}" --resampleHeightWidth ${CONFIG.iconSize} ${CONFIG.iconSize}`,
-          "提取应用图标失败"
-        );
+      // 验证图标
+      if (!fs.existsSync(iconPath)) {
+        throw new Error("图标提取失败，文件未创建");
       }
+      
+      // 更新应用对象
+      app.icon = iconFileName;
+      
+      return iconPath;
     }, CONFIG.retries);
-
-    // Validate icon
-    if (!fs.existsSync(iconPath)) {
-      throw new Error("图标提取失败，文件未创建");
-    }
     
-    const stats = fs.statSync(iconPath);
-    if (stats.size < 1000) {
-      throw new Error(`图标可能损坏，文件过小 (${stats.size} 字节)`);
-    }
-
-    // Update app object's icon property - store only file name, not path
-    app.icon = path.basename(iconPath);
     return iconPath;
   } catch (error) {
     throw new Error(`提取图标出错: ${error.message}`);
@@ -225,48 +214,49 @@ export async function extractIconAndUpdateApp(appPath, app) {
  * @returns {Object} 更新结果
  */
 export function updateAppFields(originalApp, updatedApp, content, updateContent) {
-  let count = 0;
-  let newContent = content;
-
-  // Update text field
+  let updatedContent = content;
+  let fieldCount = 0;
+  
+  // 只处理两个应用都有相同ID或关键字段的情况
+  if (!originalApp || !updatedApp) return 0;
+  
+  // 检查每个字段
   if (originalApp.text !== updatedApp.text) {
-    const textRegex = new RegExp(
-      `(text\\s*:\\s*)['"]${escapeRegExp(originalApp.text)}['"]`,
-      "g"
-    );
-    newContent = newContent.replace(textRegex, `$1'${updatedApp.text}'`);
-    logger.success(`更新应用名称: ${originalApp.text} -> ${updatedApp.text}`);
-    count++;
-  }
-
-  // Update icon field
-  if (updatedApp.icon && originalApp.icon !== updatedApp.icon) {
-    if (originalApp.icon) {
-      // Replace existing icon field
-      const iconRegex = new RegExp(
-        `(icon\\s*:\\s*)['"]${escapeRegExp(originalApp.icon)}['"]`,
-        "g"
-      );
-      newContent = newContent.replace(iconRegex, `$1'${updatedApp.icon}'`);
-      logger.success(`更新图标名称: ${updatedApp.text} -> ${updatedApp.icon}`);
-      count++;
-    } else {
-      // If no existing icon field, add after text field
-      const appRegex = new RegExp(
-        `(text\\s*:\\s*['"]${escapeRegExp(updatedApp.text)}['"])([,\\s]*?)`,
-        "g"
-      );
-      newContent = newContent.replace(
-        appRegex,
-        `$1,\n      icon: '${updatedApp.icon}'$2`
-      );
-      logger.success(`添加图标名称: ${updatedApp.text} -> ${updatedApp.icon}`);
-      count++;
+    // 查找并替换原始名称
+    try {
+      // 构造匹配文本属性的正则表达式，考虑可能的空格
+      const textRegex = new RegExp(`text:\\s*["']${escapeRegExp(originalApp.text)}["']`, "g");
+      updatedContent = updatedContent.replace(textRegex, `text: "${updatedApp.text}"`);
+      fieldCount++;
+    } catch (e) {
+      // 忽略正则表达式错误
     }
   }
-
-  updateContent(newContent);
-  return count;
+  
+  // 图标字段
+  if (originalApp.icon !== updatedApp.icon) {
+    try {
+      if (originalApp.icon) {
+        // 替换现有图标字段
+        const iconRegex = new RegExp(`icon:\\s*["']${escapeRegExp(originalApp.icon)}["']`, "g");
+        updatedContent = updatedContent.replace(iconRegex, `icon: "${updatedApp.icon}"`);
+      } else {
+        // 在文本字段后添加新图标字段
+        const textRegex = new RegExp(`text:\\s*["']${escapeRegExp(updatedApp.text)}["']`, "g");
+        updatedContent = updatedContent.replace(textRegex, `text: "${updatedApp.text}", icon: "${updatedApp.icon}"`);
+      }
+      fieldCount++;
+    } catch (e) {
+      // 忽略正则表达式错误
+    }
+  }
+  
+  // 内容变化时更新
+  if (content !== updatedContent) {
+    updateContent(updatedContent);
+  }
+  
+  return fieldCount;
 }
 
 /**
@@ -277,35 +267,35 @@ export function updateAppFields(originalApp, updatedApp, content, updateContent)
  */
 export async function saveDataToFile(filePath, updatedData) {
   try {
-    // Read original file content
+    // 读取文件内容
     const content = fs.readFileSync(filePath, "utf-8");
-
-    // Re-import original data for comparison
-    const originalModule = await import(`${filePath}?t=${Date.now()}`);
+    
+    // 加载原始数据模块进行比较
+    const originalModule = await import(filePath);
     const originalData = originalModule.data || originalModule.default;
 
-    // Create a copy of modified content
+    // 创建修改内容的副本
     let modifiedContent = content;
     let updateCount = 0;
 
-    // Process each category
+    // 处理每个分类
     for (let i = 0; i < originalData.length; i++) {
       const originalCategory = originalData[i];
       const updatedCategory = updatedData[i];
 
-      // Skip categories without items
+      // 跳过没有项目的分类
       if (!Array.isArray(originalCategory?.items) || !Array.isArray(updatedCategory?.items)) {
         continue;
       }
 
-      // Process each app
+      // 处理每个应用
       for (let j = 0; j < originalCategory.items.length; j++) {
         if (j >= updatedCategory.items.length) break;
 
         const originalApp = originalCategory.items[j];
         const updatedApp = updatedCategory.items[j];
 
-        // Update fields
+        // 更新字段
         updateCount += updateAppFields(
           originalApp,
           updatedApp,
@@ -317,7 +307,7 @@ export async function saveDataToFile(filePath, updatedData) {
       }
     }
 
-    // Only write to file if content changed
+    // 只有在内容变化时才写入文件
     if (updateCount > 0) {
       fs.writeFileSync(filePath, modifiedContent, "utf-8");
       logger.success(`已保存数据文件，更新了 ${updateCount} 个字段`);
@@ -338,33 +328,33 @@ export async function saveDataToFile(filePath, updatedData) {
  */
 export async function processApp(app) {
   try {
-    // Check if app is missing an icon
+    // 检查应用是否缺少图标
     const iconMissing = isIconMissing(app);
 
-    // Skip apps with icons if only processing missing icons
+    // 如果只处理缺少图标的应用，则跳过有图标的应用
     if (CONFIG.onlyMissingIcons && !iconMissing) {
       return { success: true, updated: false, skipped: true };
     }
 
-    // Reduce frequent logging
+    // 减少频繁的日志输出
     if (CONFIG.verbose) {
       logger.info(`处理应用: ${app.text}${iconMissing ? " (缺少图标)" : ""}`);
     }
 
-    // Find app path
+    // 查找应用路径
     const appPath = await findAppPath(app.text);
-    // Get real display name
+    // 获取真实显示名称
     const displayName = await getAppDisplayName(appPath);
 
-    // Check for name differences
+    // 检查名称差异
     if (displayName !== app.text) {
-      // Prefer real display name unless it looks incorrect
+      // 除非显示名称看起来不正确，否则优先使用真实显示名称
       const shouldUpdate = displayName.length > 0 && 
                           displayName.length < 50 &&
-                          !/^[0-9.]+$/.test(displayName); // Avoid pure numbers/versions
+                          !/^[0-9.]+$/.test(displayName); // 避免纯数字/版本号
       
       if (shouldUpdate) {
-        // Update to display name, only output in verbose mode
+        // 更新为显示名称，仅在详细模式下输出
         if (CONFIG.verbose) {
           logger.success(`更新为显示名称: "${app.text}" -> "${displayName}"`);
         }
@@ -372,7 +362,7 @@ export async function processApp(app) {
       }
     }
 
-    // Extract icon and update app object
+    // 提取图标并更新应用对象
     await extractIconAndUpdateApp(appPath, app);
 
     return { success: true, updated: true };
@@ -393,20 +383,20 @@ export async function processCategories(categories) {
     return { dataUpdated: false, failedApps: [], skippedApps: [] };
   }
   
-  // Collect all apps that need processing
+  // 收集所有需要处理的应用
   const allApps = [];
   
-  // First scan all categories to collect apps to process
+  // 首先扫描所有分类以收集需要处理的应用
   for (const category of categories) {
     if (!category || !Array.isArray(category.items)) continue;
     
     for (const app of category.items) {
       if (!app || !app.text) continue;
       
-      // Pre-check if processing is needed
+      // 预先检查是否需要处理
       const iconMissing = isIconMissing(app);
       if (CONFIG.onlyMissingIcons && !iconMissing) {
-        continue; // Skip apps with icons
+        continue; // 跳过有图标的应用
       }
       
       allApps.push({
@@ -423,18 +413,18 @@ export async function processCategories(categories) {
     return { dataUpdated: false, failedApps: [], skippedApps: [] };
   }
   
-  // Start progress tracking
+  // 启动进度跟踪
   progress.start(allApps.length);
   
   let dataUpdated = false;
   const failedApps = [];
   const skippedApps = [];
   
-  // Process apps in batches to avoid memory pressure
+  // 分批处理应用以避免内存压力
   for (let i = 0; i < allApps.length; i += CONFIG.batchSize) {
     const batch = allApps.slice(i, i + CONFIG.batchSize);
     
-    // Process current batch in parallel
+    // 并行处理当前批次
     await promisePool(batch, async ({app, category, iconMissing}) => {
       try {
         const result = await withRetry(() => processApp(app), CONFIG.retries);
@@ -446,7 +436,7 @@ export async function processCategories(categories) {
             skippedApps.push(app.text);
           }
         } else {
-          // Just collect errors, don't output
+          // 只收集错误，不输出
           failedApps.push({
             name: app.text,
             error: result.error,
@@ -457,7 +447,7 @@ export async function processCategories(categories) {
         return result;
       } catch (error) {
         progress.update();
-        // Just collect errors, don't output
+        // 只收集错误，不输出
         failedApps.push({
           name: app.text,
           error: error.message,
@@ -467,7 +457,7 @@ export async function processCategories(categories) {
     }, CONFIG.concurrency);
   }
   
-  // Complete progress
+  // 完成进度
   progress.finish();
   
   return { dataUpdated, failedApps, skippedApps };
