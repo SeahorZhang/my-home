@@ -231,6 +231,23 @@ onMounted(() => {
   50% { transform: translateY(-10px); }
 }
 
+/* 添加媒体查询，优化小屏幕下的头像大小和动画 */
+@media (max-width: 768px) {
+  .avatar-wrapper {
+    @apply size-36 mx-auto;
+    animation: floatAnimation 6s ease-in-out infinite;
+  }
+  
+  @keyframes floatAnimation {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); } /* 减小动画幅度 */
+  }
+  
+  .profile-layout {
+    @apply gap-8; /* 减小间距 */
+  }
+}
+
 .avatar {
   @apply size-full p-4 transition-all duration-500;
   border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
