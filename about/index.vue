@@ -47,10 +47,14 @@ onMounted(() => {
     <!-- 顶部个人介绍 -->
     <section class="hero-section">
       <div class="profile-layout">
-        <img :src="personalInfo.avatar" alt="个人头像" class="avatar" />
+        <div class="avatar-wrapper">
+          <img :src="personalInfo.avatar" alt="个人头像" class="avatar" />
+        </div>
         <div class="profile-info">
-          <h1 class="profile-name">{{ personalInfo.name }}</h1>
-          <h2 class="profile-title">{{ personalInfo.title }}</h2>
+          <div class="name-title-container">
+            <h1 class="profile-name">{{ personalInfo.name }}</h1>
+            <h2 class="profile-title">{{ personalInfo.title }}</h2>
+          </div>
           <div class="bio-container">
             <p class="profile-brief">{{ personalInfo.bio }}</p>
             <p class="profile-bio">
@@ -58,7 +62,7 @@ onMounted(() => {
               我坚信技术能力不该仅限于职场，并致力于探索独立开发者的自由之路。
             </p>
           </div>
-          <div class="flex gap-3">
+          <nav class="social-links-container">
             <a
               v-for="(link, index) in personalInfo.socialLinks"
               :key="index"
@@ -75,7 +79,7 @@ onMounted(() => {
                 }"
               ></span>
             </a>
-          </div>
+          </nav>
         </div>
       </div>
     </section>
@@ -189,7 +193,6 @@ onMounted(() => {
 /* 容器与布局 */
 .about-container {
   @apply opacity-0 transition-all duration-500;
-  background-color: var(--content-bg-light);
 }
 
 .dark .about-container {
@@ -202,40 +205,77 @@ onMounted(() => {
 
 /* 个人介绍区 */
 .hero-section {
-  @apply px-4 py-12 mb-16;
+  @apply relative mb-20 py-16 px-6;
   background-color: var(--hero-bg-light);
+  border-bottom: 1px solid rgba(224, 242, 254, 0.3);
 }
 
 .dark .hero-section {
   background-color: var(--hero-bg-dark);
-  box-shadow: var(--shadow-sm-dark);
+  border-bottom: 1px solid var(--border-dark);
 }
 
 .profile-layout {
-  @apply flex flex-col items-center md:flex-row md:items-center md:gap-12 max-w-5xl mx-auto;
+  @apply flex flex-col items-center md:flex-row md:items-start md:gap-16 max-w-5xl mx-auto;
+}
+
+/* 头像样式优化 - 移动端响应式调整 */
+.avatar-wrapper {
+  @apply relative;
+  /* 移动端尺寸更小，居中显示 */
+  @apply size-40 mx-auto mb-8;
+  /* 中等屏幕以上增大尺寸 */
+  @apply md:size-48 md:mx-0 md:mb-0;
+  animation: floatAnimation 6s ease-in-out infinite;
+}
+
+/* 全局动画定义 - 适用于所有屏幕尺寸 */
+@keyframes floatAnimation {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+/* 小屏幕特定样式 */
+@media (max-width: 768px) {
+  .avatar-wrapper {
+    /* 在小屏幕上减弱浮动效果 */
+    animation: floatAnimation 8s ease-in-out infinite 0.3s;
+  }
+  
+  /* 小屏幕特定动画 - 覆盖全局定义 */
+  @keyframes floatAnimation {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); } /* 小屏幕上减小浮动距离 */
+  }
 }
 
 .avatar {
-  @apply p-4 w-44 h-44 rounded-full border-5 border-primary-500/20 object-cover transition-all duration-500;
-  box-shadow: 0 10px 25px -5px rgba(14, 165, 233, 0.1);
-}
-
-.avatar:hover {
-  @apply transform scale-105;
-  box-shadow: 0 15px 30px -10px rgba(14, 165, 233, 0.2);
+  @apply size-full transition-all duration-500;
+  /* 确保填充整个容器，但保留一些内边距 */
+  @apply p-2 md:p-4;
+  /* 使边框更容易在小屏幕上看到 */
+  border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+  border: 3px solid rgba(224, 242, 254, 0.3);
+  box-shadow: 0 10px 20px rgba(14, 165, 233, 0.12);
 }
 
 .dark .avatar {
-  border-color: rgba(14, 165, 233, 0.1);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+  border-color: var(--border-dark);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
+/* 个人信息样式优化 */
 .profile-info {
-  @apply flex flex-col items-center md:items-start;
+  @apply flex flex-col items-center md:items-start space-y-4 md:space-y-6;
+  @apply w-full;
+}
+
+.name-title-container {
+  @apply text-center md:text-left;
 }
 
 .profile-name {
-  @apply text-4xl font-bold mb-2 text-transparent bg-clip-text;
+  @apply text-4xl md:text-5xl font-bold mb-2 md:mb-3 text-transparent bg-clip-text relative;
   background-image: linear-gradient(
     90deg,
     var(--accent-color),
@@ -243,21 +283,42 @@ onMounted(() => {
   );
 }
 
+/* 确保下划线在小屏幕上居中 */
+.profile-name::after {
+  content: '';
+  @apply h-1 bg-gradient-to-r from-primary-500 to-primary-700;
+  width: 60px;
+  border-radius: 2px;
+  transform: translateY(8px);
+  
+  /* 小屏幕居中，大屏幕左对齐 */
+  @apply absolute bottom-0 left-1/2 -translate-x-1/2 md:left-0 md:translate-x-0;
+}
+
+.dark .profile-name::after {
+  @apply bg-gradient-to-r from-primary-400 to-primary-600;
+}
+
 .profile-title {
-  @apply text-xl font-medium text-gray-600 mb-3;
+  @apply text-lg md:text-xl font-medium text-gray-600 mt-4 md:mt-6;
 }
 
 .dark .profile-title {
   color: var(--text-primary-dark);
 }
 
+/* 个人简介样式 */
 .bio-container {
-  @apply mb-6;
+  @apply space-y-3 md:space-y-4 text-center md:text-left max-w-full md:max-w-2xl;
+  @apply px-4 md:px-0;
 }
 
-.profile-brief,
+.profile-brief {
+  @apply text-base font-medium text-gray-700;
+}
+
 .profile-bio {
-  @apply text-base text-gray-600;
+  @apply text-base leading-relaxed text-gray-600;
 }
 
 .dark .profile-brief,
@@ -265,18 +326,31 @@ onMounted(() => {
   color: var(--text-secondary-dark);
 }
 
-.social-link {
-  @apply flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 
-         text-gray-700 transition-all duration-300;
+/* 社交链接样式 */
+.social-links-container {
+  @apply flex gap-3 md:gap-4 justify-center md:justify-start mt-2;
 }
 
-.dark .social-link {
-  @apply bg-gray-800 text-gray-300;
+.social-link {
+  /* 小屏幕上稍微小一些的图标 */
+  @apply size-9 md:size-10 flex items-center justify-center rounded-full transition-all duration-300;
+  background: linear-gradient(145deg, #f8fafc, #e6edf5);
+  box-shadow: 2px 2px 5px #d1d9e2, -2px -2px 5px #ffffff;
 }
 
 .social-link:hover {
-  @apply bg-primary-500 text-white;
-  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+  @apply transform -translate-y-1;
+  background: linear-gradient(145deg, var(--accent-color), var(--accent-dark));
+  color: white;
+}
+
+.dark .social-link {
+  background: linear-gradient(145deg, #2a2a2d, #222225);
+  box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.2), -3px -3px 6px rgba(60, 60, 65, 0.1);
+}
+
+.dark .social-link:hover {
+  background: linear-gradient(145deg, var(--accent-color), var(--accent-darker));
 }
 
 /* 内容区块 */
