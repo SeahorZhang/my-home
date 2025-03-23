@@ -4,35 +4,7 @@ export default defineConfig({
   title: "Seahor",
   themeConfig: {
     socialLinks: [{ icon: "github", link: "https://github.com/SeahorZhang" }],
-    editLink: {
-      text: "为此页提供修改建议",
-      pattern: "https://github.com/SeahorZhang/my-home/blob/main/:path",
-    },
-    lastUpdatedText: "最近更新时间",
-    // footer: {
-    //   message: `版权所有 © 2019-${new Date().getFullYear()}`,
-    //   copyright:
-    //     '<a href="https://beian.miit.gov.cn/#/Integrated/recordQuery" target="_blank">浙ICP备2021016690号-2</a>',
-    // },
-    docFooter: {
-      prev: '上一页',
-      next: '下一页'
-    },
-
-    outline: {
-      label: '页面导航'
-    },
-
-    lastUpdated: {
-      text: '最后更新于',
-      formatOptions: {
-        dateStyle: 'short',
-        timeStyle: 'medium'
-      }
-    },
-
-    langMenuLabel: '多语言',
-    returnToTopLabel: '回到顶部',
+    outline: false,
     sidebarMenuLabel: '菜单',
     darkModeSwitchLabel: '主题',
     lightModeSwitchTitle: '切换到浅色模式',
@@ -64,6 +36,11 @@ export default defineConfig({
             link: 'https://chromewebstore.google.com/detail/pinece-webext/oloddfdfgpipbngfcohnfpgdallhnoep',
           },
         ]
+      },
+      {
+        text: '关于',
+        link: '/about/index',
+        activeMatch: "/about/",
       },
     ],
     aside: false,
