@@ -1,7 +1,7 @@
 import * as prompts from "@clack/prompts";
-import { CONFIG } from './config.js';
-import { COLORS, colorize } from './utils.js';
-import { logger } from './logger.js';
+import { CONFIG } from "./config.js";
+import { COLORS, colorize } from "./utils.js";
+import { logger } from "./logger.js";
 
 /**
  * 显示交互式菜单供用户选择
@@ -17,7 +17,7 @@ export async function showMenu() {
       message: "请选择处理模式",
       options: [
         { label: "只处理缺少图标的应用", value: true },
-        { label: "处理所有应用", value: false }
+        { label: "处理所有应用", value: false },
       ],
     });
 
@@ -28,10 +28,8 @@ export async function showMenu() {
     }
 
     const modeText = mode ? "只处理缺少图标的应用" : "处理所有应用";
-    prompts.log.success(`已选择: ${modeText}`);
-
-    // 结束交互
-    prompts.outro("开始处理应用...");
+    prompts.log.step(`已选择: ${modeText}`);
+    prompts.log.step("开始处理应用");
 
     return mode;
   } catch (error) {
@@ -88,8 +86,8 @@ ${colorize("Mac应用图标提取工具", COLORS.cyan)}
 
 说明:
   此工具会从Mac系统中查找应用程序并提取其图标，
-  保存到toolSoftware/icons目录中，并更新data.js文件。
+  保存到icons目录中，并更新data.js文件。
   
   如果不提供选项，将显示交互式菜单供选择。
   `);
-} 
+}

@@ -21,11 +21,7 @@ defineProps<{
         target="_blank"
       >
         <div class="flex items-center h-8 text-[var(--vp-c-text-1)] gap-2.5">
-          <IconComponent
-            :appName="item.text"
-            :localIcon="item.icon"
-            :appUrl="item.link"
-          />
+          <IconComponent :appName="item.text" :icon="item.icon" />
           <div class="flex items-center h-8 text-[var(--vp-c-text-1)]">
             <span>{{ item.text }}</span>
           </div>

@@ -1,7 +1,7 @@
 import path from "node:path";
 
 /**
- * 应用配置
+ * 导出配置对象
  */
 export const CONFIG = {
   paths: {
@@ -11,15 +11,5 @@ export const CONFIG = {
   iconSize: 64,
   onlyMissingIcons: false,
   concurrency: 10,
-  retries: 2,
-  batchSize: 50,
-  verbose: false
+  verbose: false,
 };
-
-/**
- * 缓存昂贵操作的结果
- */
-export const CACHE = {
-  appPaths: new Map(),
-  displayNames: new Map()
-}; 

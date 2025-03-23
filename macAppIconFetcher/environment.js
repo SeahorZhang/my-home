@@ -1,24 +1,44 @@
+import os from "node:os";
 import fs from "node:fs";
-import { CONFIG } from './config.js';
-import { logger } from './logger.js';
+import { logger } from "./logger.js";
+import { CONFIG } from "./config.js";
+import { safeExec } from "./utils.js";
+import * as prompts from "@clack/prompts";
 
 /**
- * 检查环境和文件存在性
+ * 检查运行环境
  */
 export async function checkEnvironment() {
-  // 检查是否在macOS上运行
-  if (process.platform !== "darwin") {
-    throw new Error("此工具仅支持macOS系统");
+  // 检查操作系统
+  const platform = os.platform();
+  if (platform !== "darwin") {
+    throw new Error(`不支持的操作系统: ${platform}。该工具仅适用于macOS。`);
   }
 
-  // 检查数据文件是否存在
-  if (!fs.existsSync(CONFIG.paths.data)) {
-    throw new Error(`数据文件不存在: ${CONFIG.paths.data}`);
+  // 检查必要的命令
+  const commands = ["mdfind"];
+  for (const cmd of commands) {
+    try {
+      await safeExec(`which ${cmd}`);
+    } catch (error) {
+      throw new Error(`缺少必要命令: ${cmd}。请确保macOS系统工具已安装。`);
+    }
   }
 
   // 确保输出目录存在
   if (!fs.existsSync(CONFIG.paths.output)) {
-    fs.mkdirSync(CONFIG.paths.output, { recursive: true });
-    logger.info(`已创建输出目录: ${CONFIG.paths.output}`);
+    try {
+      fs.mkdirSync(CONFIG.paths.output, { recursive: true });
+      prompts.log.step(`已创建输出目录: ${CONFIG.paths.output}`);
+    } catch (error) {
+      throw new Error(`无法创建输出目录: ${error.message}`);
+    }
   }
-} 
+
+  // 检查数据文件路径
+  if (!fs.existsSync(CONFIG.paths.data)) {
+    logger.warn(`数据文件不存在: ${CONFIG.paths.data}`);
+  }
+
+  return true;
+}

@@ -13,7 +13,7 @@ export const COLORS = {
   yellow: "\x1b[33m",
   blue: "\x1b[34m",
   cyan: "\x1b[36m",
-  reset: "\x1b[0m"
+  reset: "\x1b[0m",
 };
 
 /**
@@ -63,36 +63,6 @@ export async function safeExec(command, errorMessage) {
 }
 
 /**
- * 创建计时器对象
- * @returns {Object} 带有elapsed和reset方法的计时器对象
- */
-export function createTimer() {
-  const startTime = Date.now();
-  return {
-    elapsed: () => (Date.now() - startTime) / 1000,
-    reset: () => startTime = Date.now()
-  };
-}
-
-/**
- * 使用重试机制执行函数
- * @param {Function} fn 要执行的函数
- * @param {number} retries 重试次数
- * @param {number} delay 重试间隔(毫秒)
- * @returns {Promise<any>} 函数结果
- */
-export async function withRetry(fn, retries = 2, delay = 500) {
-  try {
-    return await fn();
-  } catch (error) {
-    if (retries <= 0) throw error;
-    
-    await new Promise(resolve => setTimeout(resolve, delay));
-    return withRetry(fn, retries - 1, delay * 1.5);
-  }
-}
-
-/**
  * 并发处理队列
  * @param {Array} items 待处理项目
  * @param {Function} fn 处理函数
@@ -134,13 +104,65 @@ export async function preWarmFileSystem(directory) {
 }
 
 /**
- * 统一的错误处理
+ * 增强的错误处理
  * @param {Error} error 错误对象
  * @param {string} context 错误上下文
+ * @param {Object} options 额外选项
  * @returns {Object} 标准错误结果对象
  */
-export function handleError(error, context = '') {
+export function handleError(error, context = "", options = {}) {
+  const { silent = false, level = "error", throwError = false } = options;
+
+  // 构建错误消息
   const message = context ? `${context}: ${error.message}` : error.message;
-  if (logger) logger.error(message);
-  return { success: false, error: message };
+
+  // 根据选项决定日志行为
+  if (!silent && logger) {
+    if (level === "warn") {
+      logger.warn(message);
+    } else {
+      logger.error(message);
+    }
+  }
+
+  // 根据选项决定是否抛出错误
+  if (throwError) {
+    throw new Error(message);
+  }
+
+  // 返回标准错误对象
+  return {
+    success: false,
+    error: message,
+    code: error.code || "UNKNOWN_ERROR",
+    originalError: error,
+  };
+}
+
+/**
+ * 将错误消息转换为用户友好的消息
+ * @param {string} errorMessage 原始错误消息
+ * @returns {string} 用户友好的错误消息
+ */
+export function getUserFriendlyErrorMessage(errorMessage) {
+  // 处理常见错误
+  if (errorMessage.includes("ENOENT") && errorMessage.includes("open")) {
+    return "找不到文件或目录，请检查路径是否正确";
+  }
+
+  if (errorMessage.includes("EACCES")) {
+    return "没有足够的权限执行操作，请检查文件权限";
+  }
+
+  if (errorMessage.includes("找不到应用")) {
+    return "找不到该应用，请检查应用名称是否正确，或应用是否已安装";
+  }
+
+  // 应用图标提取相关错误
+  if (errorMessage.includes("提取图标出错")) {
+    return "提取图标时出错，可能是应用图标格式不兼容";
+  }
+
+  // 返回原始错误，如果没有匹配的友好消息
+  return errorMessage;
 }

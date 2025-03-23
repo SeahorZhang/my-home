@@ -1,50 +1,114 @@
-import { COLORS, colorize, createTimer } from './utils.js';
+import { COLORS, colorize } from "./utils.js";
 
 /**
- * 带颜色输出的日志记录器
+ * 日志级别
  */
-export const logger = {
-  info: (message) => console.log(message),
-  success: (message) => console.log(colorize(message, COLORS.green)),
-  warn: (message) => console.log(colorize(message, COLORS.yellow)),
-  error: (message) => console.error(colorize(`错误: ${message}`, COLORS.red)),
-  section: (title) => console.log(`\n${colorize("=".repeat(10) + " " + title + " " + "=".repeat(10), COLORS.cyan)}`)
+export const LOG_LEVELS = {
+  NONE: 0,
+  ERROR: 1,
+  WARN: 2,
+  INFO: 3,
+  DEBUG: 4,
+  TRACE: 5,
 };
 
 /**
- * 进度跟踪工具
+ * 增强的日志记录器
  */
-export const progress = {
-  total: 0,
-  current: 0,
-  startTime: 0,
-  
-  start(total) {
-    this.total = total;
-    this.current = 0;
-    this.startTime = Date.now();
-    logger.info(`\n准备处理 ${total} 个应用...`);
+export const logger = {
+  level: LOG_LEVELS.INFO,
+
+  /**
+   * 设置日志级别
+   * @param {number} level 日志级别
+   */
+  setLevel(level) {
+    this.level = level;
   },
-  
-  update(increment = 1) {
-    this.current += increment;
-    const percent = Math.floor((this.current / this.total) * 100);
-    
-    // 只在10%的整数倍显示进度，减少日志输出
-    if (this.current === 1 || this.current === this.total || percent % 10 === 0) {
-      const elapsed = (Date.now() - this.startTime) / 1000;
-      const remaining = this.current > 0 ? 
-        (elapsed / this.current) * (this.total - this.current) : 0;
-      
-      logger.info(colorize(
-        `[${percent}%] ${this.current}/${this.total} - 已用时: ${elapsed.toFixed(1)}秒 - 剩余: ${remaining.toFixed(1)}秒`,
-        COLORS.blue
-      ));
+
+  /**
+   * 静默模式开关
+   * @param {boolean} silent 是否静默
+   */
+  setSilent(silent) {
+    this.level = silent ? LOG_LEVELS.NONE : LOG_LEVELS.INFO;
+  },
+
+  /**
+   * 格式化日志消息
+   * @param {string} prefix 前缀
+   * @param {string} message 消息
+   * @param {string} color 颜色代码
+   * @returns {string} 格式化的消息
+   */
+  formatMessage(prefix, message, color) {
+    const prefixText = prefix ? `[${prefix}] ` : "";
+    const text = `${prefixText}${message}`;
+    return color ? colorize(text, color) : text;
+  },
+
+  /**
+   * 调试日志
+   * @param {string} message 日志消息
+   */
+  debug(message) {
+    if (this.level >= LOG_LEVELS.DEBUG) {
+      console.log(this.formatMessage("调试", message, COLORS.blue));
     }
   },
-  
-  finish() {
-    const elapsed = (Date.now() - this.startTime) / 1000;
-    logger.success(`完成! 耗时: ${elapsed.toFixed(1)}秒, 平均: ${(elapsed / this.total).toFixed(2)}秒/应用`);
-  }
-}; 
+
+  /**
+   * 信息日志
+   * @param {string} message 日志消息
+   */
+  info(message) {
+    if (this.level >= LOG_LEVELS.INFO) {
+      console.log(this.formatMessage("", message));
+    }
+  },
+
+  /**
+   * 成功日志
+   * @param {string} message 日志消息
+   */
+  success(message) {
+    if (this.level >= LOG_LEVELS.INFO) {
+      console.log(colorize(message, COLORS.green));
+    }
+  },
+
+  /**
+   * 警告日志
+   * @param {string} message 日志消息
+   */
+  warn(message) {
+    if (this.level >= LOG_LEVELS.WARN) {
+      console.log(colorize(`[警告] ${message}`, COLORS.yellow));
+    }
+  },
+
+  /**
+   * 错误日志
+   * @param {string} message 日志消息
+   */
+  error(message) {
+    if (this.level >= LOG_LEVELS.ERROR) {
+      console.error(colorize(`[错误] ${message}`, COLORS.red));
+    }
+  },
+
+  /**
+   * 分节标题
+   * @param {string} title 标题
+   */
+  section(title) {
+    if (this.level >= LOG_LEVELS.INFO) {
+      console.log(
+        `\n${colorize(
+          "=".repeat(10) + " " + title + " " + "=".repeat(10),
+          COLORS.cyan
+        )}`
+      );
+    }
+  },
+};

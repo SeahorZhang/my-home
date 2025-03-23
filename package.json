@@ -1,7 +1,7 @@
 {
   "name": "my-home",
-  "version": "1.0.0",
-  "description": "",
+  "version": "1.1.0",
+  "description": "基于 VitePress 构建的个人网站，用于记录学习笔记、技术博客和展示个人项目。",
   "main": "index.js",
   "type": "module",
   "scripts": {
