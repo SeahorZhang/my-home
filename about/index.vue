@@ -335,8 +335,7 @@ onMounted(() => {
 }
 
 .social-link:hover {
-  @apply transform -translate-y-1;
-  background: linear-gradient(145deg, var(--accent-color), var(--accent-dark));
+  background: var(--accent-color);
   color: white;
 }
 
@@ -347,11 +346,7 @@ onMounted(() => {
 }
 
 .dark .social-link:hover {
-  background: linear-gradient(
-    145deg,
-    var(--accent-color),
-    var(--accent-darker)
-  );
+  background: var(--accent-color);
 }
 
 /* 内容区块 */
@@ -399,7 +394,11 @@ onMounted(() => {
   right: 0;
   width: 400px;
   height: 400px;
-  background: radial-gradient(circle, rgba(14, 165, 233, 0.05) 0%, rgba(14, 165, 233, 0) 70%);
+  background: radial-gradient(
+    circle,
+    rgba(14, 165, 233, 0.05) 0%,
+    rgba(14, 165, 233, 0) 70%
+  );
   z-index: 0;
   border-radius: 50%;
   transform: translate(30%, -30%);
@@ -407,7 +406,6 @@ onMounted(() => {
 
 .section-badge {
   @apply inline-block px-3 py-1 text-xs font-medium rounded-full mb-4;
- 
 }
 
 .projects-grid {
