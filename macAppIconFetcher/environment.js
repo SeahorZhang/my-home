@@ -12,13 +12,13 @@ export async function checkEnvironment() {
   }
 
   // Check if data file exists
-  if (!fs.existsSync(CONFIG.dataPath)) {
-    throw new Error(`数据文件不存在: ${CONFIG.dataPath}`);
+  if (!fs.existsSync(CONFIG.paths.data)) {
+    throw new Error(`数据文件不存在: ${CONFIG.paths.data}`);
   }
 
   // Ensure output directory exists
-  if (!fs.existsSync(CONFIG.outputDir)) {
-    fs.mkdirSync(CONFIG.outputDir, { recursive: true });
-    logger.info(`已创建输出目录: ${CONFIG.outputDir}`);
+  if (!fs.existsSync(CONFIG.paths.output)) {
+    fs.mkdirSync(CONFIG.paths.output, { recursive: true });
+    logger.info(`已创建输出目录: ${CONFIG.paths.output}`);
   }
 } 

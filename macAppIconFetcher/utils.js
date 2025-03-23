@@ -93,30 +93,21 @@ export async function withRetry(fn, retries = 2, delay = 500) {
 }
 
 /**
- * Limit concurrent execution of promises
- * @param {Array} items Items to process
- * @param {Function} fn Processing function
- * @param {number} concurrency Maximum concurrent operations
- * @returns {Promise<Array>} Processing results
+ * 并发处理队列
+ * @param {Array} items 待处理项目
+ * @param {Function} fn 处理函数
+ * @param {number} concurrency 并发数
+ * @returns {Promise<Array>} 处理结果
  */
 export async function promisePool(items, fn, concurrency) {
+  // 简单分组处理
   const results = [];
-  const executing = new Set();
-
-  for (const item of items) {
-    const p = Promise.resolve().then(() => fn(item));
-    results.push(p);
-    
-    executing.add(p);
-    const clean = () => executing.delete(p);
-    p.then(clean).catch(clean);
-    
-    if (executing.size >= concurrency) {
-      await Promise.race(executing);
-    }
+  for (let i = 0; i < items.length; i += concurrency) {
+    const chunk = items.slice(i, i + concurrency);
+    const chunkResults = await Promise.all(chunk.map(fn));
+    results.push(...chunkResults);
   }
-  
-  return Promise.all(results);
+  return results;
 }
 
 /**
@@ -140,4 +131,16 @@ export async function preWarmFileSystem(directory) {
   } catch (e) {
     // Ignore warming errors
   }
+}
+
+/**
+ * 统一的错误处理
+ * @param {Error} error 错误对象
+ * @param {string} context 错误上下文
+ * @returns {Object} 标准错误结果对象
+ */
+export function handleError(error, context = '') {
+  const message = context ? `${context}: ${error.message}` : error.message;
+  if (logger) logger.error(message);
+  return { success: false, error: message };
 }

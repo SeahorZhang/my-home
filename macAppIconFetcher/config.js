@@ -4,14 +4,15 @@ import path from "node:path";
  * Application configuration
  */
 export const CONFIG = {
-  outputDir: path.join(process.cwd(), "toolSoftware", "icons"),
+  paths: {
+    output: path.join(process.cwd(), "toolSoftware", "icons"),
+    data: path.join(process.cwd(), "toolSoftware", "data.js"),
+  },
   iconSize: 64,
-  dataPath: path.join(process.cwd(), "toolSoftware", "data.js"),
   onlyMissingIcons: false,
   concurrency: 10,
-  retryAttempts: 2,
+  retries: 2,
   batchSize: 50,
-  debug: false,
   verbose: false
 };
 

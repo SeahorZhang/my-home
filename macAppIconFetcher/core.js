@@ -1,9 +1,157 @@
 import fs from "node:fs";
 import path from "node:path";
-import { CONFIG } from './config.js';
+import { CONFIG, CACHE } from './config.js';
 import { logger, progress } from './logger.js';
 import { withRetry, safeExec, promisePool, removeAppSuffix, escapeRegExp } from './utils.js';
-import { findAppPath, getAppDisplayName, findAppIconFile, isIconMissing } from './finder.js';
+
+// ================ Finder 功能 ================
+
+/**
+ * Find app path by name
+ * @param {string} appName App name
+ * @returns {Promise<string>} App path
+ */
+export async function findAppPath(appName) {
+  try {
+    // Check cache
+    if (CACHE.appPaths.has(appName)) {
+      return CACHE.appPaths.get(appName);
+    }
+
+    // Optimized query - find and cache multiple apps at once
+    const exactQuery = `mdfind "kMDItemContentType == 'com.apple.application-bundle' && kMDItemDisplayName == '${appName}'" | head -1`;
+    let appPath = await safeExec(exactQuery);
+
+    if (!appPath) {
+      const fuzzyQuery = `mdfind "kMDItemContentType == 'com.apple.application-bundle' && kMDItemDisplayName == '*${appName}*'" | head -1`;
+      appPath = await safeExec(fuzzyQuery);
+    }
+
+    if (!appPath) {
+      throw new Error(`找不到应用 "${appName}"`);
+    }
+
+    // Save to cache
+    CACHE.appPaths.set(appName, appPath);
+    return appPath;
+  } catch (error) {
+    throw new Error(`查找应用路径出错: ${error.message}`);
+  }
+}
+
+/**
+ * Get app display name using multiple methods
+ * @param {string} appPath App path
+ * @returns {Promise<string>} App display name
+ */
+export async function getAppDisplayName(appPath) {
+  try {
+    // Check cache
+    if (CACHE.displayNames.has(appPath)) {
+      return CACHE.displayNames.get(appPath);
+    }
+
+    // Use the most reliable method first
+    try {
+      const appleScript = `tell application "Finder" to get displayed name of (POSIX file "${appPath}" as alias)`;
+      const displayedName = await safeExec(`osascript -e '${appleScript}'`);
+      
+      if (displayedName) {
+        const result = removeAppSuffix(displayedName);
+        CACHE.displayNames.set(appPath, result);
+        return result;
+      }
+    } catch (e) {
+      // Ignore error, try next method
+    }
+    
+    // Use file name (without .app suffix) as fallback
+    const basename = path.basename(appPath, ".app");
+    const result = removeAppSuffix(basename);
+    CACHE.displayNames.set(appPath, result);
+    return result;
+  } catch (error) {
+    // Use file name on error
+    const basename = path.basename(appPath, ".app");
+    return removeAppSuffix(basename);
+  }
+}
+
+/**
+ * Find app icon file in application bundle
+ * @param {string} appPath App path
+ * @param {string} appName App name
+ * @returns {Promise<string>} Icon file path
+ */
+export async function findAppIconFile(appPath, appName) {
+  try {
+    // 读取Info.plist中的图标名称
+    const iconName = await safeExec(
+      `defaults read "${appPath}/Contents/Info" CFBundleIconFile || echo ""`,
+      null
+    );
+    
+    if (iconName && iconName.trim() !== "") {
+      // 添加.icns扩展名如果需要
+      const iconFile = iconName.endsWith(".icns") ? iconName : `${iconName}.icns`;
+      return path.join(appPath, "Contents", "Resources", iconFile);
+    }
+    
+    // 尝试常见图标名称
+    const resourcesDir = path.join(appPath, "Contents", "Resources");
+    if (fs.existsSync(resourcesDir)) {
+      const commonNames = ["AppIcon.icns", "Icon.icns", `${appName}.icns`];
+      
+      // 检查常见名称
+      for (const name of commonNames) {
+        const iconPath = path.join(resourcesDir, name);
+        if (fs.existsSync(iconPath)) return iconPath;
+      }
+      
+      // 查找任何.icns文件
+      try {
+        const files = fs.readdirSync(resourcesDir);
+        const icnsFile = files.find(file => file.endsWith('.icns'));
+        if (icnsFile) return path.join(resourcesDir, icnsFile);
+        
+        // 尝试查找.png文件
+        const pngFiles = files.filter(file => file.endsWith('.png'));
+        if (pngFiles.length > 0) {
+          const pngFile = pngFiles.sort((a, b) => {
+            try {
+              return fs.statSync(path.join(resourcesDir, b)).size - 
+                     fs.statSync(path.join(resourcesDir, a)).size;
+            } catch (e) {
+              return 0;
+            }
+          })[0];
+          return path.join(resourcesDir, pngFile);
+        }
+      } catch (e) {}
+    }
+    
+    // 如果所有尝试都失败，使用应用本身
+    return appPath;
+  } catch (error) {
+    if (CONFIG.verbose) {
+      logger.warn(`查找图标文件出错: ${error.message}`);
+    }
+    return appPath;
+  }
+}
+
+/**
+ * Check if app is missing an icon
+ * @param {Object} app App object
+ * @returns {boolean} Whether icon is missing
+ */
+export function isIconMissing(app) {
+  if (!app.icon) return true;
+  const iconPath = path.join(CONFIG.paths.output, app.icon);
+  return !fs.existsSync(iconPath);
+}
+
+// ================ Processor 功能 ================
 
 /**
  * Extract app icon and update app data
@@ -14,7 +162,7 @@ import { findAppPath, getAppDisplayName, findAppIconFile, isIconMissing } from '
 export async function extractIconAndUpdateApp(appPath, app) {
   // Pre-check to avoid duplicate work
   if (app.icon) {
-    const iconPath = path.join(CONFIG.outputDir, app.icon);
+    const iconPath = path.join(CONFIG.paths.output, app.icon);
     if (fs.existsSync(iconPath)) {
       // Check file size to ensure it's not empty or corrupt
       const stats = fs.statSync(iconPath);
@@ -28,7 +176,7 @@ export async function extractIconAndUpdateApp(appPath, app) {
     // Use app name as icon file name, ensure no .app suffix
     const appName = removeAppSuffix(app.text);
     const iconFileName = `${appName}.png`;
-    const iconPath = path.join(CONFIG.outputDir, iconFileName);
+    const iconPath = path.join(CONFIG.paths.output, iconFileName);
     
     // Find and extract icon
     await withRetry(async () => {
@@ -48,7 +196,7 @@ export async function extractIconAndUpdateApp(appPath, app) {
           "提取应用图标失败"
         );
       }
-    });
+    }, CONFIG.retries);
 
     // Validate icon
     if (!fs.existsSync(iconPath)) {
@@ -239,15 +387,21 @@ export async function processApp(app) {
  * @returns {Promise<Object>} Processing results
  */
 export async function processCategories(categories) {
+  // 确保 categories 是一个数组
+  if (!Array.isArray(categories)) {
+    logger.error("无效的数据格式: categories 不是数组");
+    return { dataUpdated: false, failedApps: [], skippedApps: [] };
+  }
+  
   // Collect all apps that need processing
   const allApps = [];
   
   // First scan all categories to collect apps to process
   for (const category of categories) {
-    if (!Array.isArray(category.items)) continue;
+    if (!category || !Array.isArray(category.items)) continue;
     
     for (const app of category.items) {
-      if (!app.text) continue;
+      if (!app || !app.text) continue;
       
       // Pre-check if processing is needed
       const iconMissing = isIconMissing(app);
@@ -261,6 +415,12 @@ export async function processCategories(categories) {
         iconMissing
       });
     }
+  }
+  
+  // 如果没有应用需要处理，直接返回
+  if (allApps.length === 0) {
+    logger.info("没有找到需要处理的应用");
+    return { dataUpdated: false, failedApps: [], skippedApps: [] };
   }
   
   // Start progress tracking
@@ -277,7 +437,7 @@ export async function processCategories(categories) {
     // Process current batch in parallel
     await promisePool(batch, async ({app, category, iconMissing}) => {
       try {
-        const result = await withRetry(() => processApp(app));
+        const result = await withRetry(() => processApp(app), CONFIG.retries);
         
         if (result.success) {
           if (result.updated) {
