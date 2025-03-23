@@ -10,7 +10,7 @@ const buildTime = __BUILD_TIME__;
 const animationState = ref({
   main: false,
   projects: Array(projects.length).fill(false),
-  hobbies: Array(hobbies.length).fill(false)
+  hobbies: Array(hobbies.length).fill(false),
 });
 
 // 使用更简洁的动画初始化方法
@@ -18,24 +18,24 @@ onMounted(() => {
   // 使用 requestAnimationFrame 代替多个 setTimeout
   requestAnimationFrame(() => {
     animationState.value.main = true;
-    
+
     // 使用单个定时器和索引来控制序列动画
     let index = 0;
     const animateItems = () => {
       if (index < projects.length) {
         animationState.value.projects[index] = true;
       }
-      
+
       if (index < hobbies.length) {
         animationState.value.hobbies[index] = true;
       }
-      
+
       index++;
       if (index < Math.max(projects.length, hobbies.length)) {
         setTimeout(animateItems, 120);
       }
     };
-    
+
     // 延迟启动项目和爱好的动画
     setTimeout(animateItems, 400);
   });
@@ -178,7 +178,7 @@ onMounted(() => {
 @keyframes scaleIn {
   from {
     opacity: 0;
-    transform: scale(0.95);
+    transform: scale(0.9);
   }
   to {
     opacity: 1;
@@ -188,11 +188,12 @@ onMounted(() => {
 
 /* 容器与布局 */
 .about-container {
-  @apply opacity-0 transition-all duration-700 ease-out;
-  --card-radius: 1rem;
-  --hero-bg-light: rgba(224, 242, 254, 0.2);
-  --hero-bg-dark: rgba(7, 89, 133, 0.1);
-  --divider-gradient: linear-gradient(to right, #0ea5e9, #0284c7);
+  @apply opacity-0 transition-all duration-500;
+  background-color: var(--content-bg-light);
+}
+
+.dark .about-container {
+  background-color: var(--content-bg-dark);
 }
 
 .about-container.is-visible {
@@ -201,12 +202,13 @@ onMounted(() => {
 
 /* 个人介绍区 */
 .hero-section {
-  @apply px-4 py-12 mb-16 rounded-2xl;
+  @apply px-4 py-12 mb-16;
   background-color: var(--hero-bg-light);
 }
 
 .dark .hero-section {
   background-color: var(--hero-bg-dark);
+  box-shadow: var(--shadow-sm-dark);
 }
 
 .profile-layout {
@@ -223,34 +225,53 @@ onMounted(() => {
   box-shadow: 0 15px 30px -10px rgba(14, 165, 233, 0.2);
 }
 
+.dark .avatar {
+  border-color: rgba(14, 165, 233, 0.1);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+}
+
 .profile-info {
   @apply flex flex-col items-center md:items-start;
 }
 
 .profile-name {
   @apply text-4xl font-bold mb-2 text-transparent bg-clip-text;
-  background-image: linear-gradient(90deg, #0ea5e9, #0284c7);
+  background-image: linear-gradient(
+    90deg,
+    var(--accent-color),
+    var(--accent-dark)
+  );
 }
 
 .profile-title {
-  @apply text-xl font-medium text-gray-600 dark:text-gray-400 mb-3;
+  @apply text-xl font-medium text-gray-600 mb-3;
+}
+
+.dark .profile-title {
+  color: var(--text-primary-dark);
 }
 
 .bio-container {
   @apply mb-6;
 }
 
-.profile-brief {
-  @apply text-base text-gray-600 dark:text-gray-400 mb-2;
+.profile-brief,
+.profile-bio {
+  @apply text-base text-gray-600;
 }
 
-.profile-bio {
-  @apply text-base leading-relaxed text-gray-600 dark:text-gray-400;
+.dark .profile-brief,
+.dark .profile-bio {
+  color: var(--text-secondary-dark);
 }
 
 .social-link {
-  @apply flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 
-         text-gray-700 dark:text-gray-300 transition-all duration-300;
+  @apply flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 
+         text-gray-700 transition-all duration-300;
+}
+
+.dark .social-link {
+  @apply bg-gray-800 text-gray-300;
 }
 
 .social-link:hover {
@@ -268,12 +289,16 @@ onMounted(() => {
 }
 
 .section-title {
-  @apply text-3xl font-bold text-gray-800 dark:text-gray-200 mb-3 inline-block;
+  @apply text-3xl font-bold text-gray-800 mb-3 inline-block;
+}
+
+.dark .section-title {
+  color: var(--text-primary-dark);
 }
 
 .section-divider {
   @apply h-1 w-20 rounded mx-auto;
-  background: var(--divider-gradient);
+  background: linear-gradient(90deg, var(--accent-color), var(--accent-dark));
 }
 
 /* 项目卡片 */
@@ -282,9 +307,14 @@ onMounted(() => {
 }
 
 .project-card {
-  @apply bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-md 
+  @apply rounded-xl overflow-hidden shadow-md 
          transition-all duration-500 opacity-0 transform scale-95;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  background-color: var(--card-bg-light);
+}
+
+.dark .project-card {
+  background-color: var(--card-bg-dark);
+  box-shadow: var(--shadow-sm-dark);
 }
 
 .project-card.is-visible {
@@ -293,7 +323,11 @@ onMounted(() => {
 
 .project-card:hover {
   @apply transform -translate-y-2;
-  box-shadow: 0 12px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-md-dark);
+}
+
+.dark .project-card:hover {
+  box-shadow: var(--shadow-md-dark);
 }
 
 .card-image-container {
@@ -313,11 +347,19 @@ onMounted(() => {
 }
 
 .card-title {
-  @apply text-xl font-semibold text-gray-800 dark:text-gray-200 mb-3;
+  @apply text-xl font-semibold text-gray-800 mb-3;
+}
+
+.dark .card-title {
+  color: var(--text-primary-dark);
 }
 
 .card-description {
-  @apply text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-3;
+  @apply text-sm text-gray-600 mb-4 line-clamp-3;
+}
+
+.dark .card-description {
+  color: var(--text-secondary-dark);
 }
 
 .tags-container {
@@ -325,12 +367,21 @@ onMounted(() => {
 }
 
 .tag {
-  @apply text-xs px-2 py-1 rounded bg-primary-100/40 dark:bg-primary-900/20 
-         text-primary-800 dark:text-primary-300;
+  @apply text-xs px-2 py-1 rounded text-primary-800;
+  background-color: rgba(14, 165, 233, 0.1);
+}
+
+.dark .tag {
+  background-color: rgba(14, 165, 233, 0.1);
+  color: #7dd3fc;
 }
 
 .card-link {
-  @apply inline-flex items-center text-primary-600 dark:text-primary-400 font-medium text-sm;
+  @apply inline-flex items-center text-primary-600 font-medium text-sm;
+}
+
+.dark .card-link {
+  color: #38bdf8; /* 亮蓝色，暗模式下更易辨识 */
 }
 
 .card-link:hover .arrow {
@@ -347,8 +398,14 @@ onMounted(() => {
 }
 
 .hobby-card {
-  @apply bg-white dark:bg-gray-800 rounded-xl p-6 text-center 
-         transition-all duration-500 opacity-0 transform scale-95 shadow-md;
+  @apply rounded-xl overflow-hidden shadow-md p-6
+         transition-all duration-500 opacity-0 transform scale-95;
+  background-color: var(--card-bg-light);
+}
+
+.dark .hobby-card {
+  background-color: var(--card-bg-dark);
+  box-shadow: var(--shadow-sm-dark);
 }
 
 .hobby-card.is-visible {
@@ -357,7 +414,11 @@ onMounted(() => {
 
 .hobby-card:hover {
   @apply transform -translate-y-2 shadow-lg;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-md-dark);
+}
+
+.dark .hobby-card:hover {
+  box-shadow: var(--shadow-md-dark);
 }
 
 .hobby-icon {
@@ -365,16 +426,28 @@ onMounted(() => {
 }
 
 .hobby-title {
-  @apply text-xl font-semibold text-gray-800 dark:text-gray-200 mb-3;
+  @apply text-xl font-semibold text-gray-800 mb-3;
+}
+
+.dark .hobby-title {
+  color: var(--text-primary-dark);
 }
 
 .hobby-description {
-  @apply text-sm text-gray-600 dark:text-gray-400;
+  @apply text-sm text-gray-600;
+}
+
+.dark .hobby-description {
+  color: var(--text-secondary-dark);
 }
 
 /* 构建时间 */
 .build-info-container {
-  @apply text-center text-sm text-gray-500 dark:text-gray-400 mt-16 mb-8;
+  @apply text-center text-sm text-gray-500 mt-16 mb-8;
+}
+
+.dark .build-info-container {
+  color: var(--text-secondary-dark);
 }
 
 .build-info {
@@ -383,14 +456,23 @@ onMounted(() => {
 }
 
 .dark .build-info {
-  background-color: rgba(7, 89, 133, 0.1);
+  background-color: rgba(27, 27, 31, 0.6);
+  border: 1px solid var(--border-dark);
 }
 
 .build-icon {
   @apply text-primary-500 mr-2;
 }
 
+.dark .build-icon {
+  color: #38bdf8;
+}
+
 .build-time {
-  @apply text-gray-600 dark:text-gray-400;
+  @apply text-gray-600;
+}
+
+.dark .build-time {
+  color: var(--text-secondary-dark);
 }
 </style>

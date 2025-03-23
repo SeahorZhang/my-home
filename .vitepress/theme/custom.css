@@ -15,6 +15,37 @@
   --color-primary-DEFAULT: var(--color-primary-500);
 }
 
+/* 颜色变量 - 统一所有主题色，以1B1B1F为暗色主调 */
+:root {
+  /* 基础色调 */
+  --card-bg-light: #ffffff;
+  --card-bg-dark: #222225; /* 略微亮于背景的卡片色 */
+  --content-bg-light: #f8fafc;
+  --content-bg-dark: #1B1B1F; /* 主要暗色背景 */
+  
+  /* 文本颜色 */
+  --text-primary-dark: #e6e6e9; /* 主文本略亮 */
+  --text-secondary-dark: #a1a1a8; /* 次要文本 */
+  --text-muted-dark: #71717a; /* 弱化文本 */
+  
+  /* 边框和分割线 */
+  --border-dark: #2e2e35; /* 略微亮于背景的边框 */
+  
+  /* 强调色和渐变 */
+  --accent-color: #0ea5e9;
+  --accent-dark: #0284c7;
+  --accent-darker: #0369a1;
+  
+  /* 阴影 */
+  --shadow-color-dark: rgba(0, 0, 0, 0.5);
+  --shadow-sm-dark: 0 4px 8px rgba(0, 0, 0, 0.2);
+  --shadow-md-dark: 0 8px 16px rgba(0, 0, 0, 0.25);
+  
+  /* 区域背景 */
+  --hero-bg-light: rgba(224, 242, 254, 0.2);
+  --hero-bg-dark: #222225; /* 略微亮于主背景的区域 */
+}
+
 .vp-doc a {
   @apply no-underline;
 }
