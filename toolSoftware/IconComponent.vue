@@ -22,7 +22,7 @@ const iconUrl = ref("");
 function loadLocalIcon() {
   if (!props.icon) return handleIconError();
   try {
-    iconUrl.value = withBase("./icons/" + props.icon);
+    iconUrl.value = withBase("/icons/" + props.icon);
   } catch {
     handleIconError();
   }

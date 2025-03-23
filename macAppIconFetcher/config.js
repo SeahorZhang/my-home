@@ -5,7 +5,7 @@ import path from "node:path";
  */
 export const CONFIG = {
   paths: {
-    output: path.join(process.cwd(), "toolSoftware", "icons"),
+    output: path.join(process.cwd(), "public", "icons"),
     data: path.join(process.cwd(), "toolSoftware", "data.js"),
   },
   iconSize: 64,
