@@ -311,6 +311,7 @@ export default [
       },
       {
         text: "Shadowrocket",
+      icon: 'Shadowrocket.png',
         type: "代理",
         desc: "基于规则的代理工具客户端，适用于iPhone/iPad。",
         link: "https://apps.apple.com/us/app/shadowrocket/id932747118?l=zh-Hans-CN",

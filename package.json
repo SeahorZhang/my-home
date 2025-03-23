@@ -9,7 +9,7 @@
     "dev": "vitepress dev",
     "build": "vitepress build",
     "preview": "vitepress preview",
-    "icon": "node macAppIconFetcher.js"
+    "icon": "node macAppIconFetcher/index.js"
   },
   "keywords": [],
   "author": "",
