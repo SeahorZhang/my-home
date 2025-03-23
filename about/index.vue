@@ -85,7 +85,7 @@ onMounted(() => {
     </section>
 
     <!-- 项目展示 - 优化版 -->
-    <section class="content-section projects-section">
+    <section class="content-section">
       <div class="section-header">
         <h2 class="section-title">开发项目</h2>
         <div class="section-divider"></div>
@@ -189,12 +189,8 @@ onMounted(() => {
 
 /* 容器与布局 */
 .about-container {
+  margin-top: calc(var(--vp-nav-height) * -1);
   @apply opacity-0 transition-all duration-500;
-  background-color: var(--content-bg-light);
-}
-
-.dark .about-container {
-  background-color: var(--content-bg-dark);
 }
 
 .about-container.is-visible {
@@ -203,14 +199,12 @@ onMounted(() => {
 
 /* 个人介绍区 */
 .hero-section {
-  @apply relative mb-20 py-16 px-6;
+  @apply relative mb-20 pt-40 pb-32 px-6;
   background-color: var(--hero-bg-light);
-  border-bottom: 1px solid rgba(224, 242, 254, 0.3);
 }
 
 .dark .hero-section {
   background-color: var(--hero-bg-dark);
-  border-bottom: 1px solid var(--border-dark);
 }
 
 .profile-layout {
@@ -263,7 +257,7 @@ onMounted(() => {
 }
 
 .dark .avatar {
-  border-color: var(--border-dark);
+  border-color: var(--hero-bg-dark);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
@@ -372,36 +366,6 @@ onMounted(() => {
 .section-divider {
   @apply h-1 w-20 rounded mx-auto;
   background: linear-gradient(90deg, var(--accent-color), var(--accent-dark));
-}
-
-/* 项目展示部分 - 现代化样式 */
-.projects-section {
-  @apply py-16;
-  background-color: var(--content-bg-light);
-  position: relative;
-  overflow: hidden;
-}
-
-.dark .projects-section {
-  background-color: var(--content-bg-dark);
-}
-
-/* 增加背景装饰 */
-.projects-section::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 400px;
-  height: 400px;
-  background: radial-gradient(
-    circle,
-    rgba(14, 165, 233, 0.05) 0%,
-    rgba(14, 165, 233, 0) 70%
-  );
-  z-index: 0;
-  border-radius: 50%;
-  transform: translate(30%, -30%);
 }
 
 .section-badge {

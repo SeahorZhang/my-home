@@ -14,7 +14,7 @@
   --color-primary-DEFAULT: var(--color-primary-500);
 }
 
-/* 新的主题色系统 - 基于 #409EFF */
+/* 主题色系统 - 基于 #409EFF */
 :root {
   /* 基础变量更新 */
   --accent-color: var(--color-primary-500);
@@ -22,9 +22,20 @@
   --accent-darker: var(--color-primary-700);
   --accent-light: var(--color-primary-300);
 
-  /* 背景色系 */
-  --hero-bg-light: rgba(237, 245, 255, 0.6);
-  --hero-bg-dark: rgba(30, 86, 160, 0.08);
+  /* 背景色系统优化 - Hero 区域 */
+  --hero-bg-light: rgba(232, 246, 255, 0.8);
+  /* 更柔和的蓝色背景 */
+  --hero-bg-dark: rgba(15, 17, 20, 0.6);
+  /* 更深邃的蓝色背景，增加透明度 */
+
+  /* 内容背景色 */
+  --content-bg-light: #ffffff;
+  --content-bg-dark: #121418;
+  /* 稍微调深，增加对比度 */
+
+  /* 边框颜色 */
+  --border-dark: rgba(48, 84, 150, 0.2);
+  /* 蓝色调的边框 */
 
   /* 卡片背景 */
   --card-bg-light: #ffffff;
@@ -69,4 +80,14 @@
 
 .VPHome {
   @apply !mb-0;
+}
+
+/* 更精确的导航栏透明样式 */
+body:has([class*="about-container"]) .VPNavBar.top {
+  background: transparent !important;
+}
+
+/* 有.VPNavBar.top时 .divider隐藏 */
+.VPNavBar.top .divider {
+  @apply hidden;
 }
