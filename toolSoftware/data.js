@@ -166,9 +166,9 @@ export default [
       //   icon: "icons/Manico.png"
       // },
       {
-        text: "Downie",
+        text: 'Downie 4',
         type: "视频下载",
-        icon: 'Downie.png',
+        icon: 'Downie 4.png',
         desc: "简单易用的视频下载工具，支持从YouTube、Vimeo等上千个网站下载视频，自动检测浏览器中的视频。",
         link: "https://software.charliemonroe.net/downie/",
         tags: [
@@ -313,7 +313,6 @@ export default [
         text: "Shadowrocket",
         type: "代理",
         desc: "基于规则的代理工具客户端，适用于iPhone/iPad。",
-        icon: "./icons/Shadowrocket.png",
         link: "https://apps.apple.com/us/app/shadowrocket/id932747118?l=zh-Hans-CN",
         tags: [
           {

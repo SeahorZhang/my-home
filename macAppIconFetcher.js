@@ -12,7 +12,18 @@ const CONFIG = {
   outputDir: path.join(process.cwd(), "toolSoftware", "icons"),
   iconSize: 64,
   dataPath: path.join(process.cwd(), "toolSoftware", "data.js"),
-  onlyMissingIcons: false
+  onlyMissingIcons: false,
+  concurrency: 10, // 增加并发数以提高性能
+  retryAttempts: 2, // 失败操作的重试次数
+  batchSize: 50,    // 批处理大小
+  debug: false,     // 调试模式
+  verbose: false   // 详细模式
+};
+
+// 添加缓存机制
+const CACHE = {
+  appPaths: new Map(), // 缓存应用路径查询结果
+  displayNames: new Map() // 缓存应用显示名称
 };
 
 // 颜色常量
@@ -165,6 +176,9 @@ function parseArgs() {
     } else if (args[i] === "--help" || args[i] === "-h") {
       showHelp();
       process.exit(0);
+    } else if (args[i] === "--verbose" || args[i] === "-v") {
+      CONFIG.verbose = true;
+      logger.info(colorize("模式: 详细输出", COLORS.cyan));
     }
   }
 
@@ -185,6 +199,7 @@ ${colorize("Mac应用图标提取工具", COLORS.cyan)}
   --only-missing, -m   只处理缺少图标的应用
   --all, -a            处理所有应用 (默认)
   --help, -h           显示此帮助信息
+  --verbose, -v        详细输出模式，默认关闭
 
 说明:
   此工具会从Mac系统中查找应用程序并提取其图标，
@@ -195,17 +210,48 @@ ${colorize("Mac应用图标提取工具", COLORS.cyan)}
 }
 
 /**
- * 根据应用名称查找应用路径
+ * 限制并发执行Promise的辅助函数
+ * @param {Array} items 需要处理的项目
+ * @param {Function} fn 处理函数
+ * @param {number} concurrency 最大并发数
+ * @returns {Promise<Array>} 处理结果
+ */
+async function promisePool(items, fn, concurrency) {
+  const results = [];
+  const executing = new Set();
+
+  for (const item of items) {
+    const p = Promise.resolve().then(() => fn(item));
+    results.push(p);
+    
+    executing.add(p);
+    const clean = () => executing.delete(p);
+    p.then(clean).catch(clean);
+    
+    if (executing.size >= concurrency) {
+      await Promise.race(executing);
+    }
+  }
+  
+  return Promise.all(results);
+}
+
+/**
+ * 根据应用名称查找应用路径 (优化版)
  * @param {string} appName 应用名称
  * @returns {Promise<string>} 应用路径
  */
 async function findAppPath(appName) {
   try {
-    // 使用精确匹配
+    // 检查缓存
+    if (CACHE.appPaths.has(appName)) {
+      return CACHE.appPaths.get(appName);
+    }
+
+    // 优化查询 - 一次性查找并缓存多个应用
     const exactQuery = `mdfind "kMDItemContentType == 'com.apple.application-bundle' && kMDItemDisplayName == '${appName}'" | head -1`;
     let appPath = await safeExec(exactQuery);
 
-    // 如果没有精确匹配，尝试部分匹配
     if (!appPath) {
       const fuzzyQuery = `mdfind "kMDItemContentType == 'com.apple.application-bundle' && kMDItemDisplayName == '*${appName}*'" | head -1`;
       appPath = await safeExec(fuzzyQuery);
@@ -215,6 +261,8 @@ async function findAppPath(appName) {
       throw new Error(`找不到应用 "${appName}"`);
     }
 
+    // 保存到缓存
+    CACHE.appPaths.set(appName, appPath);
     return appPath;
   } catch (error) {
     throw new Error(`查找应用路径出错: ${error.message}`);
@@ -222,117 +270,139 @@ async function findAppPath(appName) {
 }
 
 /**
- * 使用多种方法获取应用的真实显示名称
+ * 使用多种方法获取应用的真实显示名称 (优化版)
  * @param {string} appPath 应用路径
  * @returns {Promise<string>} 应用显示名称
  */
 async function getAppDisplayName(appPath) {
   try {
-    const nameResults = [];
+    // 检查缓存
+    if (CACHE.displayNames.has(appPath)) {
+      return CACHE.displayNames.get(appPath);
+    }
 
-    // 1. 从Finder获取显示名称
+    // 优化: 减少查询方法数量，只使用最可靠的方法
+    // 1. 从Finder获取显示名称 (最可靠)
     try {
-      const appleScript = `
-tell application "Finder"
-  set appFile to POSIX file "${appPath}" as alias
-  get displayed name of appFile
-end tell`;
-      
+      const appleScript = `tell application "Finder" to get displayed name of (POSIX file "${appPath}" as alias)`;
       const displayedName = await safeExec(`osascript -e '${appleScript}'`);
       
       if (displayedName) {
-        nameResults.push({ source: "Finder显示名称", name: displayedName });
+        const result = removeAppSuffix(displayedName);
+        CACHE.displayNames.set(appPath, result);
+        return result;
       }
     } catch (e) {
       // 忽略错误，尝试下一个方法
     }
     
-    // 2. 使用mdls获取元数据
-    try {
-      const mdlsOutput = await safeExec(`mdls -name kMDItemDisplayName "${appPath}"`);
-      const mdlsMatch = mdlsOutput.match(/kMDItemDisplayName\s*=\s*"([^"]+)"/);
-      
-      if (mdlsMatch && mdlsMatch[1]) {
-        nameResults.push({ source: "mdls显示名称", name: mdlsMatch[1] });
-      }
-    } catch (e) {
-      // 忽略错误，尝试下一个方法
-    }
-    
-    // 3. 从Info.plist获取CFBundleDisplayName
-    const displayName = await safeExec(
-      `defaults read "${appPath}/Contents/Info" CFBundleDisplayName 2>/dev/null || echo ""`
-    );
-    
-    if (displayName) {
-      nameResults.push({ source: "CFBundleDisplayName", name: displayName });
-    }
-    
-    // 4. 从Info.plist获取CFBundleName
-    const bundleName = await safeExec(
-      `defaults read "${appPath}/Contents/Info" CFBundleName 2>/dev/null || echo ""`
-    );
-    
-    if (bundleName) {
-      nameResults.push({ source: "CFBundleName", name: bundleName });
-    }
-    
-    // 5. 最后使用文件名（去掉.app后缀）
+    // 2. 使用文件名（去掉.app后缀）作为备选
     const basename = path.basename(appPath, ".app");
-    nameResults.push({ source: "文件名", name: basename });
-    
-    // 按优先级选择第一个可用名称
-    if (nameResults.length > 0) {
-      const result = nameResults[0];
-      logger.info(`使用应用名称来源: ${result.source} -> "${result.name}"`);
-      return removeAppSuffix(result.name);
-    }
-    
-    // 默认回退到文件名
-    return removeAppSuffix(basename);
+    const result = removeAppSuffix(basename);
+    CACHE.displayNames.set(appPath, result);
+    return result;
   } catch (error) {
-    logger.warn(`获取应用显示名称出错，使用默认名称: ${error.message}`);
-    return removeAppSuffix(path.basename(appPath, ".app"));
+    // 出错时使用文件名
+    const basename = path.basename(appPath, ".app");
+    return removeAppSuffix(basename);
   }
 }
 
 /**
- * 查找应用中的图标文件
+ * 从应用包中查找图标文件
  * @param {string} appPath 应用路径
- * @param {string} appName 应用名称 (用于错误信息)
+ * @param {string} appName 应用名称
  * @returns {Promise<string>} 图标文件路径
  */
 async function findAppIconFile(appPath, appName) {
-  // 查找应用中的图标路径
-  const iconName = await safeExec(
-    `defaults read "${appPath}/Contents/Info" CFBundleIconFile || echo ""`,
-    `读取应用"${appName}"的图标名称信息出错`
-  );
-  
-  let iconFile = iconName;
-
-  // 有些图标没有扩展名，需要添加.icns
-  if (iconFile && !iconFile.endsWith(".icns")) {
-    iconFile += ".icns";
-  }
-
-  if (!iconFile) {
-    // 如果Info.plist中没有指定图标，查找Resources目录中的.icns文件
-    const iconSearch = await safeExec(
-      `find "${appPath}/Contents/Resources" -name "*.icns" | head -1`, 
-      `查找应用"${appName}"的图标文件出错`
+  try {
+    // 首先尝试从Info.plist读取CFBundleIconFile
+    const iconName = await safeExec(
+      `defaults read "${appPath}/Contents/Info" CFBundleIconFile || echo ""`,
+      `读取应用"${appName}"的图标名称信息出错`
     );
     
-    iconFile = iconSearch;
-
-    if (!iconFile) {
-      throw new Error(`无法找到应用 "${appName}" 的图标`);
+    // 处理图标名称
+    let iconFile = iconName;
+    
+    // 检查图标名称是否为空
+    if (!iconFile || iconFile.trim() === "") {
+      // 如果Info.plist没有图标信息，尝试使用通用图标命名规则查找
+      if (CONFIG.verbose) {
+        logger.warn(`应用 "${appName}" 的Info.plist中没有定义图标名称`);
+      }
+      
+      // 尝试使用常见图标命名方式
+      const possibleIconNames = [
+        "AppIcon.icns",
+        `${appName}.icns`,
+        "Icon.icns"
+      ];
+      
+      // 检查Resources目录中是否存在这些图标文件
+      for (const name of possibleIconNames) {
+        const possiblePath = path.join(appPath, "Contents", "Resources", name);
+        if (fs.existsSync(possiblePath)) {
+          iconFile = name;
+          if (CONFIG.verbose) {
+            logger.info(`找到备选图标: ${name}`);
+          }
+          break;
+        }
+      }
+      
+      // 如果仍未找到图标，尝试在Resources目录中查找任何.icns文件
+      if (!iconFile) {
+        try {
+          const resourcesDir = path.join(appPath, "Contents", "Resources");
+          const files = fs.readdirSync(resourcesDir);
+          const icnsFile = files.find(file => file.endsWith('.icns'));
+          
+          if (icnsFile) {
+            iconFile = icnsFile;
+            if (CONFIG.verbose) {
+              logger.info(`找到备选图标: ${icnsFile}`);
+            }
+          }
+        } catch (e) {
+          // 忽略读取目录的错误
+        }
+      }
+      
+      // 如果仍未找到任何图标，使用应用本身作为图标源
+      if (!iconFile) {
+        if (CONFIG.verbose) {
+          logger.warn(`未找到图标文件，将使用应用本身作为图标源`);
+        }
+        return appPath;
+      }
     }
-  } else {
-    iconFile = path.join(appPath, "Contents", "Resources", iconFile);
-  }
 
-  return iconFile;
+    // 有些图标没有扩展名，需要添加.icns
+    if (iconFile && !iconFile.endsWith(".icns")) {
+      iconFile = `${iconFile}.icns`;
+    }
+
+    // 构建完整的图标路径
+    const fullIconPath = path.join(appPath, "Contents", "Resources", iconFile);
+    
+    // 检查图标文件是否存在
+    if (!fs.existsSync(fullIconPath)) {
+      // 如果图标文件不存在，使用应用本身作为图标源
+      if (CONFIG.verbose) {
+        logger.warn(`图标文件不存在: ${fullIconPath}，将使用应用本身作为图标源`);
+      }
+      return appPath;
+    }
+
+    return fullIconPath;
+  } catch (error) {
+    // 出错时使用应用本身作为图标源
+    if (CONFIG.verbose) {
+      logger.warn(`查找图标出错: ${error.message}，将使用应用本身作为图标源`);
+    }
+    return appPath;
+  }
 }
 
 /**
@@ -357,30 +427,155 @@ function isIconMissing(app) {
 }
 
 /**
- * 从应用提取图标并更新应用数据
+ * 计时器函数
+ * @returns {Object} 计时器对象
+ */
+function createTimer() {
+  const startTime = Date.now();
+  return {
+    elapsed: () => (Date.now() - startTime) / 1000,
+    reset: () => startTime = Date.now()
+  };
+}
+
+// 添加进度条组件
+const progress = {
+  total: 0,
+  current: 0,
+  timer: createTimer(),
+  start: (total) => {
+    progress.total = total;
+    progress.current = 0;
+    progress.timer = createTimer();
+    logger.info(`\n准备处理 ${total} 个应用...`);
+  },
+  update: (increment = 1) => {
+    progress.current += increment;
+    const percent = Math.floor((progress.current / progress.total) * 100);
+    const elapsed = progress.timer.elapsed();
+    const estimatedTotal = (elapsed / progress.current) * progress.total;
+    const remaining = estimatedTotal - elapsed;
+    
+    // 每10%更新一次进度，避免过多输出
+    if (progress.current === 1 || progress.current === progress.total || percent % 10 === 0) {
+      logger.info(colorize(
+        `进度: ${percent}% (${progress.current}/${progress.total}) - 已用时间: ${elapsed.toFixed(1)}秒 - 预计剩余: ${remaining.toFixed(1)}秒`,
+        COLORS.blue
+      ));
+    }
+  },
+  finish: () => {
+    const elapsed = progress.timer.elapsed();
+    logger.success(`完成！总耗时: ${elapsed.toFixed(2)}秒，平均每个应用 ${(elapsed / progress.total).toFixed(2)}秒`);
+  }
+};
+
+/**
+ * 带重试的执行函数
+ * @param {Function} fn 要执行的函数
+ * @param {number} retries 重试次数
+ * @param {number} delay 重试延迟(ms)
+ * @returns {Promise<any>} 函数结果
+ */
+async function withRetry(fn, retries = CONFIG.retryAttempts, delay = 500) {
+  try {
+    return await fn();
+  } catch (error) {
+    if (retries <= 0) throw error;
+    
+    if (CONFIG.debug) {
+      logger.warn(`操作失败，${retries}秒后重试: ${error.message}`);
+    }
+    
+    await new Promise(resolve => setTimeout(resolve, delay));
+    return withRetry(fn, retries - 1, delay * 1.5);
+  }
+}
+
+/**
+ * 从应用提取图标并更新应用数据 (优化版)
  * @param {string} appPath 应用路径
  * @param {Object} app 应用对象
  * @returns {Promise<string>} 图标保存路径
  */
 async function extractIconAndUpdateApp(appPath, app) {
+  // 预检查以避免重复工作
+  if (app.icon) {
+    const iconPath = path.join(CONFIG.outputDir, app.icon);
+    if (fs.existsSync(iconPath)) {
+      // 检查文件大小，确保不是空文件或损坏文件
+      const stats = fs.statSync(iconPath);
+      if (stats.size > 1000) { // 一个有效图标至少应该有1KB
+        return iconPath; // 静默跳过，不再输出日志
+      }
+      // 出现问题时不打印警告，只在最后汇总展示
+    }
+  }
+
   try {
-    // 确保应用名称不包含.app后缀
+    // 使用应用名称作为图标文件名，确保不含.app后缀
     const appName = removeAppSuffix(app.text);
-    const iconPath = path.join(CONFIG.outputDir, `${appName}.png`);
+    const iconFileName = `${appName}.png`;
+    const iconPath = path.join(CONFIG.outputDir, iconFileName);
 
-    // 查找应用中的图标文件
-    const iconFile = await findAppIconFile(appPath, appName);
+    // 查找应用中的图标
+    await withRetry(async () => {
+      // 更高效的图标提取方式
+      const iconFile = await findAppIconFile(appPath, appName);
+      
+      // 根据不同情况使用不同的提取命令
+      if (iconFile === appPath) {
+        // 如果图标源是应用本身，使用两步提取方法
+        // 第一步: 尝试使用macOS系统自带方法提取图标
+        try {
+          // 使用临时文件而不是进程替换
+          const tempIconPath = path.join(CONFIG.outputDir, `temp_${Date.now()}.png`);
+          
+          // 首先尝试使用sips直接从应用程序获取图标
+          await safeExec(
+            `sips -s format png "${appPath}/Contents/Resources/AppIcon.icns" --out "${tempIconPath}" --resampleHeightWidth ${CONFIG.iconSize} ${CONFIG.iconSize} 2>/dev/null`,
+            ""
+          );
+          
+          // 检查临时文件是否成功创建
+          if (fs.existsSync(tempIconPath) && fs.statSync(tempIconPath).size > 1000) {
+            // 成功创建临时文件，移动到目标位置
+            fs.renameSync(tempIconPath, iconPath);
+          } else {
+            // 尝试从系统获取应用图标
+            await safeExec(
+              `sips -s format png "${appPath}" --out "${iconPath}" --resampleHeightWidth ${CONFIG.iconSize} ${CONFIG.iconSize}`,
+              "提取应用图标失败"
+            );
+          }
+        } catch (e) {
+          // 如果上述方法都失败，尝试最后的方法
+          await safeExec(
+            `sips -s format png "${appPath}" --out "${iconPath}" --resampleHeightWidth ${CONFIG.iconSize} ${CONFIG.iconSize}`,
+            "提取应用图标失败"
+          );
+        }
+      } else {
+        // 正常情况，从图标文件提取
+        await safeExec(
+          `sips -s format png "${iconFile}" --out "${iconPath}" --resampleHeightWidth ${CONFIG.iconSize} ${CONFIG.iconSize}`,
+          "提取图标失败"
+        );
+      }
+    });
 
-    // 使用sips提取图标并转换为PNG
-    await safeExec(
-      `sips -s format png "${iconFile}" --out "${iconPath}" --resampleHeightWidth ${CONFIG.iconSize} ${CONFIG.iconSize}`,
-      `从图标文件生成PNG图标失败`
-    );
+    // 验证图标是否有效
+    if (!fs.existsSync(iconPath)) {
+      throw new Error("图标提取失败，文件未创建");
+    }
+    
+    const stats = fs.statSync(iconPath);
+    if (stats.size < 1000) {
+      throw new Error(`图标可能损坏，文件过小 (${stats.size} 字节)`);
+    }
 
     // 更新应用对象的icon属性 - 只存储文件名，不带路径
     app.icon = path.basename(iconPath);
-    logger.success(`图标提取成功: ${iconPath}`);
-
     return iconPath;
   } catch (error) {
     throw new Error(`提取图标出错: ${error.message}`);
@@ -517,31 +712,29 @@ async function processApp(app) {
       return { success: true, updated: false, skipped: true };
     }
 
-    logger.info(`\n处理应用: ${app.text}${iconMissing ? colorize(" (缺少图标)", COLORS.yellow) : ""}`);
+    // 简化输出，减少频繁日志
+    if (CONFIG.verbose) {
+      logger.info(`处理应用: ${app.text}${iconMissing ? colorize(" (缺少图标)", COLORS.yellow) : ""}`);
+    }
 
     // 查找应用路径
     const appPath = await findAppPath(app.text);
-    logger.info(`应用路径: ${appPath}`);
-
     // 获取应用的真实显示名称
     const displayName = await getAppDisplayName(appPath);
 
     // 检查名称差异
     if (displayName !== app.text) {
-      logger.info(`应用名称差异: "${app.text}" -> "${displayName}"`);
-
       // 确认使用哪个名称 - 优先使用真实显示名称，除非它看起来不正确
       const shouldUpdate = displayName.length > 0 && 
                           displayName.length < 50 &&
                           !/^[0-9.]+$/.test(displayName); // 避免纯数字和版本号
       
       if (shouldUpdate) {
-        // 更新为显示名称
+        // 更新为显示名称，但只在verbose模式输出
+        if (CONFIG.verbose) {
+          logger.success(`更新为显示名称: "${app.text}" -> "${displayName}"`);
+        }
         app.text = removeAppSuffix(displayName);
-        logger.success(`更新为显示名称: "${app.text}"`);
-      } else {
-        // 保留原名称
-        logger.info(`保留原名称: "${app.text}"`);
       }
     }
 
@@ -555,46 +748,51 @@ async function processApp(app) {
 }
 
 /**
- * 主函数 - 应用入口点
+ * 并行处理应用类别
+ * @param {Array} categories 应用类别数组
+ * @returns {Promise<{dataUpdated: boolean, failedApps: Array, skippedApps: Array}>}
  */
-async function main() {
-  try {
-    // 检查环境
-    await checkEnvironment();
-
-    // 解析命令行参数，判断是否需要显示菜单
-    const needMenu = parseArgs();
-
-    // 如果没有通过命令行指定处理模式，显示交互式菜单
-    if (needMenu) {
-      CONFIG.onlyMissingIcons = await showMenu();
+async function processCategories(categories) {
+  // 收集所有需要处理的应用
+  const allApps = [];
+  
+  // 先遍历所有类别，收集需要处理的应用
+  for (const category of categories) {
+    if (!Array.isArray(category.items)) continue;
+    
+    for (const app of category.items) {
+      if (!app.text) continue;
+      
+      // 预先检查是否需要处理
+      const iconMissing = isIconMissing(app);
+      if (CONFIG.onlyMissingIcons && !iconMissing) {
+        continue; // 跳过已有图标的应用
+      }
+      
+      allApps.push({
+        app,
+        category,
+        iconMissing
+      });
     }
-
-    logger.info("导入数据文件...");
-
-    // 导入data.js
-    const dataModule = await import(CONFIG.dataPath);
-    const data = dataModule.data || dataModule.default;
-
-    // 记录是否有数据更新
-    let dataUpdated = false;
-
-    // 记录失败的应用和跳过的应用
-    const failedApps = [];
-    const skippedApps = [];
-
-    // 遍历所有类别
-    for (const category of data) {
-      if (!Array.isArray(category.items)) continue;
-
-      logger.section(`处理类别: ${category.text}`);
-
-      // 遍历类别中的所有应用
-      for (const app of category.items) {
-        if (!app.text) continue;
-
-        const result = await processApp(app);
-
+  }
+  
+  // 启动进度跟踪
+  progress.start(allApps.length);
+  
+  let dataUpdated = false;
+  const failedApps = [];
+  const skippedApps = [];
+  
+  // 分批处理应用以避免内存压力
+  for (let i = 0; i < allApps.length; i += CONFIG.batchSize) {
+    const batch = allApps.slice(i, i + CONFIG.batchSize);
+    
+    // 并行处理当前批次
+    const results = await promisePool(batch, async ({app, category, iconMissing}) => {
+      try {
+        const result = await withRetry(() => processApp(app));
+        
         if (result.success) {
           if (result.updated) {
             dataUpdated = true;
@@ -602,33 +800,122 @@ async function main() {
             skippedApps.push(app.text);
           }
         } else {
-          logger.error(`处理应用"${app.text}"出错: ${result.error}`);
+          // 不再输出错误信息，只收集起来
           failedApps.push({
             name: app.text,
             error: result.error,
           });
         }
+        
+        progress.update();
+        return result;
+      } catch (error) {
+        progress.update();
+        // 不再输出错误信息，只收集起来
+        failedApps.push({
+          name: app.text,
+          error: error.message,
+        });
+        return { success: false, error: error.message };
       }
-    }
+    }, CONFIG.concurrency);
+  }
+  
+  // 完成进度
+  progress.finish();
+  
+  return { dataUpdated, failedApps, skippedApps };
+}
 
+/**
+ * 主函数 - 应用入口点 (优化版)
+ */
+async function main() {
+  const mainTimer = createTimer();
+  
+  try {
+    // 检查环境和解析参数
+    await checkEnvironment();
+    const needMenu = parseArgs();
+    
+    if (needMenu) {
+      CONFIG.onlyMissingIcons = await showMenu();
+    }
+    
+    // 引入预加载技术
+    logger.info("加载数据文件...");
+    const dataPromise = import(CONFIG.dataPath);
+    
+    // 预热文件系统缓存
+    logger.info("准备输出目录...");
+    const preWarmPromise = preWarmFileSystem();
+    
+    // 等待所有预加载完成
+    const [dataModule] = await Promise.all([dataPromise, preWarmPromise]);
+    const data = dataModule.data || dataModule.default;
+    
+    // 使用优化后的类别处理
+    const { dataUpdated, failedApps, skippedApps } = 
+      await processCategories(data);
+    
     // 如果有数据更新，保存到文件
     if (dataUpdated) {
       await saveDataToFile(CONFIG.dataPath, data);
     }
-
-    // 输出处理结果
-    logger.success("\n处理完成!");
-
-    // 显示跳过的应用数量
+    
+    // 输出详细统计信息
+    const totalTime = mainTimer.elapsed();
+    logger.success(colorize(`\n处理完成! 总耗时: ${totalTime.toFixed(2)}秒`, COLORS.green));
+    
+    // 显示统计信息
+    const stats = {
+      total: data.reduce((sum, cat) => sum + (cat.items?.length || 0), 0),
+      processed: data.reduce((sum, cat) => sum + (cat.items?.filter(i => i.icon)?.length || 0), 0),
+      skipped: skippedApps.length,
+      failed: failedApps.length,
+      updatedTexts: 0, // 这个需要在处理过程中计数
+      updatedIcons: 0  // 这个需要在处理过程中计数
+    };
+    
+    logger.info("\n" + colorize("===== 统计信息 =====", COLORS.cyan));
+    logger.info(`总应用数: ${stats.total}`);
+    logger.info(`已处理应用: ${stats.processed} (${((stats.processed/stats.total)*100).toFixed(1)}%)`);
+    
     if (CONFIG.onlyMissingIcons && skippedApps.length > 0) {
-      logger.info(`\n已跳过 ${skippedApps.length} 个已有图标的应用`);
+      logger.info(`已跳过应用: ${skippedApps.length}`);
     }
-
-    // 显示失败的应用
+    
     if (failedApps.length > 0) {
       logger.error(`\n以下 ${failedApps.length} 个应用处理失败:`);
-      failedApps.forEach((app, index) => {
-        logger.error(`  ${index + 1}. ${app.name}: ${app.error}`);
+      
+      // 错误类型分类改进
+      const errorsByType = {};
+      failedApps.forEach(app => {
+        let errorType = "其他错误";
+        
+        if (app.error.includes("提取图标出错")) {
+          errorType = "图标提取错误";
+        } else if (app.error.includes("找不到应用") || app.error.includes("查找应用路径出错")) {
+          errorType = "应用路径错误";
+        } else if (app.error.includes("无法获取显示名称")) {
+          errorType = "名称获取错误";
+        }
+        
+        errorsByType[errorType] = errorsByType[errorType] || [];
+        errorsByType[errorType].push(app);
+      });
+      
+      // 按错误类型分组显示
+      Object.entries(errorsByType).forEach(([type, apps]) => {
+        logger.info(colorize(`\n【${type}】(${apps.length}个)`, COLORS.yellow));
+        
+        apps.forEach((app, index) => {
+          if (index < 10 || apps.length < 20) {
+            logger.error(`  ${index + 1}. ${app.name}: ${app.error}`);
+          } else if (index === 10) {
+            logger.error(`  ... 以及 ${apps.length - 10} 个其他应用`);
+          }
+        });
       });
     } else {
       logger.success("所有处理的应用均成功!");
@@ -636,6 +923,28 @@ async function main() {
   } catch (error) {
     logger.error(error.message);
     process.exit(1);
+  }
+}
+
+/**
+ * 预热文件系统缓存
+ */
+async function preWarmFileSystem() {
+  try {
+    // 读取输出目录内容到缓存
+    if (fs.existsSync(CONFIG.outputDir)) {
+      const files = fs.readdirSync(CONFIG.outputDir);
+      for (const file of files.slice(0, 10)) {
+        try {
+          // 只读取前几个文件的元数据，足以激活文件系统缓存
+          fs.statSync(path.join(CONFIG.outputDir, file));
+        } catch (e) {
+          // 忽略单个文件的错误
+        }
+      }
+    }
+  } catch (e) {
+    // 忽略预热错误
   }
 }
 
