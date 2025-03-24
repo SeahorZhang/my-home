@@ -12,11 +12,12 @@ defineProps({
     <div class="build-info">
       <span
         class="vpi-social-build-16 build-icon"
+        aria-hidden="true"
         style="
           --icon: url('https://api.iconify.design/qlementine-icons/build-16.svg');
         "
       ></span>
-      <span class="build-time">本站构建于：{{ buildTime }}</span>
+      <time :datetime="buildTime" class="build-time">本站构建于：{{ buildTime }}</time>
     </div>
   </footer>
 </template>

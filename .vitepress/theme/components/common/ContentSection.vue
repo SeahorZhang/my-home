@@ -8,7 +8,7 @@ defineProps({
 </script>
 
 <template>
-  <section class="mb-20 px-4">
+  <section class="mb-20 px-4 content-section">
     <div class="section-header">
       <h2 class="section-title">{{ title }}</h2>
       <div class="section-divider"></div>
@@ -20,6 +20,10 @@ defineProps({
 
 <style scoped>
 @reference '../../custom.css';
+
+.content-section {
+  scroll-margin-top: 80px; /* 为锚点导航预留空间 */
+}
 
 .section-header {
   @apply text-center mb-12;

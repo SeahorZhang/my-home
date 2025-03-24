@@ -29,7 +29,7 @@ defineProps({
       { 'animated': animated }
     ]"
   >
-    <img :src="src" :alt="alt" class="avatar" />
+    <img :src="src" :alt="alt" class="avatar" loading="lazy" />
   </div>
 </template>
 

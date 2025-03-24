@@ -1,5 +1,16 @@
 <script setup>
+/**
+ * @typedef {Object} Project
+ * @property {string} title - 项目标题
+ * @property {string} description - 项目描述
+ * @property {string} image - 项目图片URL
+ * @property {string} link - 项目链接
+ */
+
 defineProps({
+  /**
+   * @type {Project}
+   */
   project: {
     type: Object,
     required: true
@@ -21,6 +32,7 @@ defineProps({
         :src="project.image"
         :alt="project.title"
         class="card-image"
+        loading="lazy"
       />
       <span class="project-type-badge">Chrome扩展</span>
       <div class="card-overlay">
@@ -28,6 +40,7 @@ defineProps({
           :href="project.link"
           class="view-project-btn"
           target="_blank"
+          :aria-label="`查看项目: ${project.title}`"
         >
           查看项目
         </a>
@@ -37,7 +50,7 @@ defineProps({
       <h3 class="card-title">{{ project.title }}</h3>
       <p class="card-description">{{ project.description }}</p>
       <a :href="project.link" class="card-link" target="_blank">
-        了解更多 <span class="arrow">→</span>
+        了解更多 <span class="arrow" aria-hidden="true">→</span>
       </a>
     </div>
   </div>
@@ -53,6 +66,7 @@ defineProps({
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
   border: 1px solid rgba(224, 242, 254, 0.2);
   height: 100%;
+  will-change: transform, opacity;
 }
 
 .dark .project-card {

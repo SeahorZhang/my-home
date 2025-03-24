@@ -1,5 +1,15 @@
 <script setup>
+/**
+ * @typedef {Object} Hobby
+ * @property {string} name - 爱好名称
+ * @property {string} icon - 爱好图标
+ * @property {string} description - 爱好描述
+ */
+
 defineProps({
+  /**
+   * @type {Hobby}
+   */
   hobby: {
     type: Object,
     required: true
@@ -16,7 +26,7 @@ defineProps({
     class="hobby-card"
     :class="{ 'is-visible': isVisible }"
   >
-    <div class="hobby-icon">{{ hobby.icon }}</div>
+    <div class="hobby-icon" aria-hidden="true">{{ hobby.icon }}</div>
     <h3 class="hobby-title">{{ hobby.name }}</h3>
     <p class="hobby-description">{{ hobby.description }}</p>
   </div>
@@ -29,6 +39,7 @@ defineProps({
   @apply rounded-xl overflow-hidden shadow-md p-6
          transition-all duration-500 opacity-0 transform scale-95;
   background-color: var(--card-bg-light);
+  will-change: transform, opacity;
 }
 
 .dark .hobby-card {

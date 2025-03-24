@@ -1,5 +1,6 @@
 <script setup>
 import Avatar from "./common/Avatar.vue";
+import SocialLinks from "./common/SocialLinks.vue";
 
 const props = defineProps({
   personalInfo: {
@@ -11,6 +12,9 @@ const props = defineProps({
 
 <template>
   <section class="hero-section">
+    <!-- 预加载头像图片 -->
+    <link rel="preload" :href="personalInfo.avatar" as="image" />
+    
     <div class="profile-layout">
       <Avatar
         :src="personalInfo.avatar"
@@ -28,24 +32,9 @@ const props = defineProps({
             我坚信技术能力不该仅限于职场，并致力于探索独立开发者的自由之路。
           </p>
         </div>
-        <nav class="social-links-container">
-          <a
-            v-for="(link, index) in personalInfo.socialLinks"
-            :key="index"
-            :href="link.link"
-            target="_blank"
-            :title="link.label"
-            class="social-link"
-            aria-label="社交媒体链接"
-          >
-            <span
-              :class="`vpi-social-${link.icon}`"
-              :style="{
-                '--icon': `url('https://api.iconify.design/simple-icons/${link.icon}.svg')`,
-              }"
-            ></span>
-          </a>
-        </nav>
+        
+        <!-- 使用提取的社交链接组件 -->
+        <SocialLinks :links="personalInfo.socialLinks" />
       </div>
     </div>
   </section>
@@ -107,31 +96,5 @@ const props = defineProps({
 .dark .profile-brief,
 .dark .profile-bio {
   color: var(--text-secondary-dark);
-}
-
-/* 社交链接样式 */
-.social-links-container {
-  @apply flex gap-4 justify-center md:justify-start mt-2;
-}
-
-.social-link {
-  @apply flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300;
-  background: linear-gradient(145deg, #f8fafc, #e6edf5);
-  box-shadow: 3px 3px 6px #d1d9e2, -3px -3px 6px #ffffff;
-}
-
-.social-link:hover {
-  background: var(--accent-color);
-  color: white;
-}
-
-.dark .social-link {
-  background: linear-gradient(145deg, #2a2a2d, #222225);
-  box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.2),
-    -3px -3px 6px rgba(60, 60, 65, 0.1);
-}
-
-.dark .social-link:hover {
-  background: var(--accent-color);
 }
 </style>
