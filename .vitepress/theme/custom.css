@@ -81,13 +81,3 @@
 .VPHome {
   @apply !mb-0;
 }
-
-/* 更精确的导航栏透明样式 */
-body:has([class*="about-container"]) .VPNavBar.top {
-  background: transparent !important;
-}
-
-/* 有.VPNavBar.top时 .divider隐藏 */
-.VPNavBar.top .divider {
-  @apply hidden;
-}

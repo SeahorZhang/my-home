@@ -38,11 +38,6 @@ export default defineConfig({
           },
         ]
       },
-      {
-        text: '关于',
-        link: '/about/index',
-        activeMatch: "/about/",
-      },
     ],
     aside: false,
   },
