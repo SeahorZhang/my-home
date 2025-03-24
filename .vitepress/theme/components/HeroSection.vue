@@ -1,0 +1,137 @@
+<script setup>
+import Avatar from "./common/Avatar.vue";
+
+const props = defineProps({
+  personalInfo: {
+    type: Object,
+    required: true,
+  },
+});
+</script>
+
+<template>
+  <section class="hero-section">
+    <div class="profile-layout">
+      <Avatar
+        :src="personalInfo.avatar"
+        :alt="personalInfo.name + '的头像'"
+        animated
+      />
+      <div class="profile-info">
+        <div class="name-title-container">
+          <h1 class="profile-name">{{ personalInfo.name }}</h1>
+          <h2 class="profile-title">{{ personalInfo.title }}</h2>
+        </div>
+        <div class="bio-container">
+          <p class="profile-bio">
+            👋 你好！我是一名充满热情的技术爱好者和创造者。
+            我坚信技术能力不该仅限于职场，并致力于探索独立开发者的自由之路。
+          </p>
+        </div>
+        <nav class="social-links-container">
+          <a
+            v-for="(link, index) in personalInfo.socialLinks"
+            :key="index"
+            :href="link.link"
+            target="_blank"
+            :title="link.label"
+            class="social-link"
+            aria-label="社交媒体链接"
+          >
+            <span
+              :class="`vpi-social-${link.icon}`"
+              :style="{
+                '--icon': `url('https://api.iconify.design/simple-icons/${link.icon}.svg')`,
+              }"
+            ></span>
+          </a>
+        </nav>
+      </div>
+    </div>
+  </section>
+</template>
+
+<style scoped>
+@reference '../custom.css';
+/* 个人介绍区 */
+.hero-section {
+  @apply relative mb-20 pt-40 pb-32 px-6;
+  background-color: var(--hero-bg-light);
+}
+
+.dark .hero-section {
+  background-color: var(--hero-bg-dark);
+}
+
+.profile-layout {
+  @apply flex flex-col md:flex-row md:items-start md:gap-16 max-w-5xl mx-auto;
+}
+
+/* 个人信息样式优化 */
+.profile-info {
+  @apply flex flex-col items-center md:items-start space-y-6;
+}
+
+.name-title-container {
+  @apply text-center md:text-left;
+}
+
+.profile-name {
+  @apply text-4xl font-bold text-gray-800 mb-2 relative inline-block;
+}
+
+.dark .profile-name {
+  color: var(--text-primary-dark);
+}
+
+.profile-title {
+  @apply text-xl text-gray-600 font-medium;
+}
+
+.dark .profile-title {
+  color: var(--text-secondary-dark);
+}
+
+.bio-container {
+  @apply space-y-4 text-center md:text-left max-w-2xl;
+}
+
+.profile-brief {
+  @apply text-base font-medium text-gray-700;
+}
+
+.profile-bio {
+  @apply text-base leading-relaxed text-gray-600;
+}
+
+.dark .profile-brief,
+.dark .profile-bio {
+  color: var(--text-secondary-dark);
+}
+
+/* 社交链接样式 */
+.social-links-container {
+  @apply flex gap-4 justify-center md:justify-start mt-2;
+}
+
+.social-link {
+  @apply flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300;
+  background: linear-gradient(145deg, #f8fafc, #e6edf5);
+  box-shadow: 3px 3px 6px #d1d9e2, -3px -3px 6px #ffffff;
+}
+
+.social-link:hover {
+  background: var(--accent-color);
+  color: white;
+}
+
+.dark .social-link {
+  background: linear-gradient(145deg, #2a2a2d, #222225);
+  box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.2),
+    -3px -3px 6px rgba(60, 60, 65, 0.1);
+}
+
+.dark .social-link:hover {
+  background: var(--accent-color);
+}
+</style>
