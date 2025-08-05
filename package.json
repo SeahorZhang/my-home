@@ -17,7 +17,7 @@
   "devDependencies": {
     "@clack/prompts": "^0.10.0",
     "@types/node": "^22.0.0",
-    "vitepress": "1.6.3"
+    "vitepress": "1.6.4"
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.0.15",
