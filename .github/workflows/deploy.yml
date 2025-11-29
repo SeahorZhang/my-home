@@ -50,7 +50,7 @@ jobs:
           npm run build # 或 pnpm build / yarn build / bun run build
           touch .vitepress/dist/.nojekyll
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v4
         with:
           path: ./.vitepress/dist
 
